@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalFoundationApi::class)
+@file:OptIn(ExperimentalFoundationApi::class, ExperimentalFoundationApi::class)
 
 package jatx.common
 
@@ -146,7 +146,7 @@ open class CommonMainActivity : ComponentActivity() {
                     allEvents[index - 1].time - allEvents[index].time
                 }
                 ?.filter {
-                    it < 4 * 60 * 60 * 1000L
+                    it < 6 * 60 * 60 * 1000L
                 }
                 ?.takeIf {
                     it.isNotEmpty()
