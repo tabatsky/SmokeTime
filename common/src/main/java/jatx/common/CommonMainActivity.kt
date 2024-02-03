@@ -36,6 +36,8 @@ open class CommonMainActivity : ComponentActivity() {
     private val totalCount = mutableStateOf("0")
     private val averageCount = mutableStateOf("0")
     private val averageTime = mutableStateOf("0 h 0 m")
+    private val firstSmokingTime = mutableStateOf("0 h 0 m")
+    private val perCurrentMonth = mutableStateOf("0; 0")
     private val showAddConfirm = mutableStateOf(false)
     private val showDeleteConfirm = mutableStateOf(false)
 
@@ -54,6 +56,8 @@ open class CommonMainActivity : ComponentActivity() {
             totalCount = totalCount,
             averageCount = averageCount,
             averageTime = averageTime,
+            firstSmokingTime = firstSmokingTime,
+            perCurrentMonth = perCurrentMonth,
             onSmokeClick = {
                 showAddConfirm.value = true
             },
@@ -154,6 +158,18 @@ open class CommonMainActivity : ComponentActivity() {
                 ?.average()
                 ?.toLong() ?: 0L)
                 .format()
+            firstSmokingTime.value = allEvents
+                .filter { Date(it.time).dayStart() == Date().dayStart() }
+                .minBy { it.time }
+                .let { Date(it.time) }
+                .formattedTime()
+            perCurrentMonth.value = allEvents
+                .count { Date(it.time).monthStart() == Date().monthStart() }
+                .let {
+                    val packs = it / 20
+                    val units = it % 20
+                    "$packs; $units"
+                }
         }
     }
 
@@ -187,11 +203,13 @@ fun MainScreen(
     totalCount: MutableState<String>,
     averageCount: MutableState<String>,
     averageTime: MutableState<String>,
+    firstSmokingTime: MutableState<String>,
+    perCurrentMonth: MutableState<String>,
     onSmokeClick: () -> Unit,
     onSmokeLongClick: () -> Unit
 ) {
     SmokeTimeTheme {
-        VerticalPager(pageCount = 2) { page ->
+        VerticalPager(pageCount = 3) { page ->
             when (page) {
                 0 -> {
                     Column(
@@ -237,6 +255,18 @@ fun MainScreen(
                     ) {
                         Text(text = averageCount.value)
                         Text(text = averageTime.value)
+                    }
+                }
+                2 -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colors.background),
+                        verticalArrangement = Arrangement.SpaceEvenly,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(text = firstSmokingTime.value)
+                        Text(text = perCurrentMonth.value)
                     }
                 }
             }
