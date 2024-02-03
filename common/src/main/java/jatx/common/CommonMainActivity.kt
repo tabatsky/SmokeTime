@@ -140,7 +140,7 @@ open class CommonMainActivity : ComponentActivity() {
                 .average()
                 .toInt()
                 .toString()
-            averageTime.value = (allEvents
+            averageTime.value = allEvents
                 .indices
                 .takeIf {
                     it.count() >= 2
@@ -156,7 +156,7 @@ open class CommonMainActivity : ComponentActivity() {
                     it.isNotEmpty()
                 }
                 ?.average()
-                ?.toLong() ?: 0L)
+                ?.toLong()
                 .format()
             firstSmokingTime.value = allEvents
                 .filter { Date(it.time).dayStart() == Date().dayStart() }

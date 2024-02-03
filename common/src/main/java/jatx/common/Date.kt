@@ -46,10 +46,12 @@ fun Date.formattedTime(): String {
     return sdf.format(this)
 }
 
-fun Long.format(): String {
-    val seconds = this / 1000
-    val minutesTotal = seconds / 60
-    val minutes = minutesTotal % 60
-    val hours = minutesTotal / 60
-    return "$hours h $minutes m"
+fun Long?.format(): String {
+    return this?.let {
+        val seconds = it / 1000
+        val minutesTotal = seconds / 60
+        val minutes = minutesTotal % 60
+        val hours = minutesTotal / 60
+        "$hours h $minutes m"
+    } ?: "0 h 0 m"
 }
