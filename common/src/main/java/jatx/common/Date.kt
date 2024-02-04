@@ -5,6 +5,14 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
+val formattedZeroTime = 0L.format()
+
+val formattedMidnight: String by lazy {
+    val midnight = Date().dayStart()
+    val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
+    sdf.format(midnight)
+}
+
 fun Date.dayStart(): Date {
     val calendar = Calendar.getInstance()
     calendar.time = this
@@ -46,12 +54,10 @@ fun Date.formattedTime(): String {
     return sdf.format(this)
 }
 
-fun Long?.format(): String {
-    return this?.let {
-        val seconds = it / 1000
-        val minutesTotal = seconds / 60
-        val minutes = minutesTotal % 60
-        val hours = minutesTotal / 60
-        "$hours h $minutes m"
-    } ?: "0 h 0 m"
+fun Long.format(): String = this.let {
+    val seconds = it / 1000
+    val minutesTotal = seconds / 60
+    val minutes = minutesTotal % 60
+    val hours = minutesTotal / 60
+    "$hours h $minutes m"
 }

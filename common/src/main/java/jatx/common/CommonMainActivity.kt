@@ -32,12 +32,12 @@ import kotlinx.coroutines.launch
 import java.util.Date
 
 open class CommonMainActivity : ComponentActivity() {
-    private val ago = mutableStateOf("0 h 0 m")
+    private val ago = mutableStateOf(formattedZeroTime)
     private val totalCount = mutableStateOf("0")
-    private val averageCount = mutableStateOf("0")
-    private val averageTime = mutableStateOf("0 h 0 m")
-    private val firstSmokingTime = mutableStateOf("0 h 0 m")
-    private val perCurrentMonth = mutableStateOf("0; 0")
+    private val averageCountPerDay = mutableStateOf("0")
+    private val averageTimePerDay = mutableStateOf(formattedZeroTime)
+    private val firstSmokingTimeForToday = mutableStateOf(formattedMidnight)
+    private val countForCurrentMonth = mutableStateOf(0.formattedCigaretteCount)
     private val showAddConfirm = mutableStateOf(false)
     private val showDeleteConfirm = mutableStateOf(false)
 
@@ -54,10 +54,10 @@ open class CommonMainActivity : ComponentActivity() {
             buttonLabel = buttonLabel,
             ago = ago,
             totalCount = totalCount,
-            averageCount = averageCount,
-            averageTime = averageTime,
-            firstSmokingTime = firstSmokingTime,
-            perCurrentMonth = perCurrentMonth,
+            averageCount = averageCountPerDay,
+            averageTime = averageTimePerDay,
+            firstSmokingTime = firstSmokingTimeForToday,
+            perCurrentMonth = countForCurrentMonth,
             onSmokeClick = {
                 showAddConfirm.value = true
             },
@@ -123,53 +123,20 @@ open class CommonMainActivity : ComponentActivity() {
                 .smokingDao()
                 .getEventCountForTimeInterval(date.dayStart().time, date.dayEnd().time)
                 .toString()
-            ago.value = (AppDatabase
+            ago.value = AppDatabase
                 .invoke(applicationContext)
                 .smokingDao()
                 .getLastEvent()
                 ?.let { Date(it.time) }
-                ?: date).format()
+                ?.format() ?: formattedZeroTime
             val allEvents = AppDatabase
                 .invoke(applicationContext)
                 .smokingDao()
                 .getAllEvents()
-            averageCount.value = allEvents
-                .groupBy { Date(it.time).dayStart() }
-                .values
-                .map { it.count() }
-                .average()
-                .toInt()
-                .toString()
-            averageTime.value = allEvents
-                .indices
-                .takeIf {
-                    it.count() >= 2
-                }
-                ?.drop(1)
-                ?.map { index ->
-                    allEvents[index - 1].time - allEvents[index].time
-                }
-                ?.filter {
-                    it < 6 * 60 * 60 * 1000L
-                }
-                ?.takeIf {
-                    it.isNotEmpty()
-                }
-                ?.average()
-                ?.toLong()
-                .format()
-            firstSmokingTime.value = allEvents
-                .filter { Date(it.time).dayStart() == Date().dayStart() }
-                .minBy { it.time }
-                .let { Date(it.time) }
-                .formattedTime()
-            perCurrentMonth.value = allEvents
-                .count { Date(it.time).monthStart() == Date().monthStart() }
-                .let {
-                    val packs = it / 20
-                    val units = it % 20
-                    "$packs; $units"
-                }
+            averageCountPerDay.value = allEvents.averageCountPerDay
+            averageTimePerDay.value = allEvents.averageTimePerDay
+            firstSmokingTimeForToday.value = allEvents.firstSmokingTimeForToday
+            countForCurrentMonth.value = allEvents.countForCurrentMonth
         }
     }
 
