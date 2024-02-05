@@ -14,8 +14,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -32,14 +33,14 @@ import kotlinx.coroutines.launch
 import java.util.Date
 
 open class CommonMainActivity : ComponentActivity() {
-    private val ago = mutableStateOf(formattedZeroTime)
-    private val totalCount = mutableStateOf("0")
-    private val averageCountPerDay = mutableStateOf("0")
-    private val averageTimePerDay = mutableStateOf(formattedZeroTime)
-    private val firstSmokingTimeForToday = mutableStateOf(formattedMidnight)
-    private val countForCurrentMonth = mutableStateOf(0.formattedCigaretteCount)
-    private val showAddConfirm = mutableStateOf(false)
-    private val showDeleteConfirm = mutableStateOf(false)
+    private var ago by mutableStateOf(formattedZeroTime)
+    private var totalCount by mutableStateOf("0")
+    private var averageCountPerDay by mutableStateOf("0")
+    private var averageTimePerDay by mutableStateOf(formattedZeroTime)
+    private var firstSmokingTimeForToday by mutableStateOf(formattedMidnight)
+    private var countForCurrentMonth by mutableStateOf(0.formattedCigaretteCount)
+    private var showAddConfirm by mutableStateOf(false)
+    private var showDeleteConfirm by mutableStateOf(false)
 
     override fun onResume() {
         super.onResume()
@@ -59,13 +60,13 @@ open class CommonMainActivity : ComponentActivity() {
             firstSmokingTime = firstSmokingTimeForToday,
             perCurrentMonth = countForCurrentMonth,
             onSmokeClick = {
-                showAddConfirm.value = true
+                showAddConfirm = true
             },
             onSmokeLongClick = {
-                showDeleteConfirm.value = true
+                showDeleteConfirm = true
             }
         )
-        if (showAddConfirm.value) {
+        if (showAddConfirm) {
             Alert(
                 title = {
                     Text(text = areYouSureAdd)
@@ -73,7 +74,7 @@ open class CommonMainActivity : ComponentActivity() {
                 positiveButton = {
                     Button(
                         onClick = {
-                            showAddConfirm.value = false
+                            showAddConfirm = false
                             newEvent()
                         }) {
                         Text(yes)
@@ -82,14 +83,14 @@ open class CommonMainActivity : ComponentActivity() {
                 negativeButton = {
                     Button(
                         onClick = {
-                            showAddConfirm.value = false
+                            showAddConfirm = false
                         }) {
                         Text(no)
                     }
                 }
             )
         }
-        if (showDeleteConfirm.value) {
+        if (showDeleteConfirm) {
             Alert(
                 title = {
                     Text(text = areYouSureDelete)
@@ -97,7 +98,7 @@ open class CommonMainActivity : ComponentActivity() {
                 positiveButton = {
                     Button(
                         onClick = {
-                            showDeleteConfirm.value = false
+                            showDeleteConfirm = false
                             deleteLastEvent()
                         }) {
                         Text(yes)
@@ -106,7 +107,7 @@ open class CommonMainActivity : ComponentActivity() {
                 negativeButton = {
                     Button(
                         onClick = {
-                            showDeleteConfirm.value = false
+                            showDeleteConfirm = false
                         }) {
                         Text(no)
                     }
@@ -118,12 +119,12 @@ open class CommonMainActivity : ComponentActivity() {
     private fun updateFromDB() {
         lifecycleScope.launch {
             val date = Date()
-            totalCount.value = AppDatabase
+            totalCount = AppDatabase
                 .invoke(applicationContext)
                 .smokingDao()
                 .getEventCountForTimeInterval(date.dayStart().time, date.dayEnd().time)
                 .toString()
-            ago.value = AppDatabase
+            ago = AppDatabase
                 .invoke(applicationContext)
                 .smokingDao()
                 .getLastEvent()
@@ -133,10 +134,10 @@ open class CommonMainActivity : ComponentActivity() {
                 .invoke(applicationContext)
                 .smokingDao()
                 .getAllEvents()
-            averageCountPerDay.value = allEvents.averageCountPerDay
-            averageTimePerDay.value = allEvents.averageTimePerDay
-            firstSmokingTimeForToday.value = allEvents.firstSmokingTimeForToday
-            countForCurrentMonth.value = allEvents.countForCurrentMonth
+            averageCountPerDay = allEvents.averageCountPerDay
+            averageTimePerDay = allEvents.averageTimePerDay
+            firstSmokingTimeForToday = allEvents.firstSmokingTimeForToday
+            countForCurrentMonth = allEvents.countForCurrentMonth
         }
     }
 
@@ -166,12 +167,12 @@ open class CommonMainActivity : ComponentActivity() {
 @Composable
 fun MainScreen(
     buttonLabel: String,
-    ago: MutableState<String>,
-    totalCount: MutableState<String>,
-    averageCount: MutableState<String>,
-    averageTime: MutableState<String>,
-    firstSmokingTime: MutableState<String>,
-    perCurrentMonth: MutableState<String>,
+    ago: String,
+    totalCount: String,
+    averageCount: String,
+    averageTime: String,
+    firstSmokingTime: String,
+    perCurrentMonth: String,
     onSmokeClick: () -> Unit,
     onSmokeLongClick: () -> Unit
 ) {
@@ -186,7 +187,7 @@ fun MainScreen(
                         verticalArrangement = Arrangement.SpaceEvenly,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(text = totalCount.value)
+                        Text(text = totalCount)
                         Text(
                             text = buttonLabel,
                             textAlign = TextAlign.Center,
@@ -209,7 +210,7 @@ fun MainScreen(
                                     )
                                 },
                         )
-                        Text(text = ago.value)
+                        Text(text = ago)
                     }
                 }
                 1 -> {
@@ -220,8 +221,8 @@ fun MainScreen(
                         verticalArrangement = Arrangement.SpaceEvenly,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(text = averageCount.value)
-                        Text(text = averageTime.value)
+                        Text(text = averageCount)
+                        Text(text = averageTime)
                     }
                 }
                 2 -> {
@@ -232,8 +233,8 @@ fun MainScreen(
                         verticalArrangement = Arrangement.SpaceEvenly,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(text = firstSmokingTime.value)
-                        Text(text = perCurrentMonth.value)
+                        Text(text = firstSmokingTime)
+                        Text(text = perCurrentMonth)
                     }
                 }
             }
