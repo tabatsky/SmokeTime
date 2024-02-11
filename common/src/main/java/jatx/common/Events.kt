@@ -32,12 +32,15 @@ fun List<SmokeEventEntity>.averageMinutesPerDayLastTime(lastDays: Int) = this
     .roundToInt()
 
 val List<SmokeEventEntity>.firstSmokingTimeForToday: String
-    get() = this
-        .filter { Date(it.time).dayStart() == Date().dayStart() }
-        .takeIf { it.isNotEmpty() }
-        ?.minBy { it.time }
-        ?.let { Date(it.time) }
-        ?.formattedTime() ?: formattedMidnight
+    get() {
+        val time = this
+            .filter { Date(it.time).dayStart() == Date().dayStart() }
+            .takeIf { it.isNotEmpty() }
+            ?.minBy { it.time }
+            ?.let { Date(it.time) }
+            ?.formattedTime() ?: formattedMidnight
+        return "First today:\n$time"
+    }
 
 val List<SmokeEventEntity>.countForCurrentMonth: String
     get() = this
@@ -49,7 +52,7 @@ val Int.formattedCigaretteCount: String
         .let {
             val packs = it / 20
             val units = it % 20
-            "$packs; $units"
+            "Current month:\n$packs packs + $units"
         }
 
 val List<SmokeEventEntity>.countsByDay: List<Pair<Date, Int>>

@@ -2,7 +2,6 @@
 
 package jatx.common
 
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -164,7 +163,6 @@ open class CommonMainActivity : ComponentActivity() {
             countForCurrentMonth = allEvents.countForCurrentMonth
             countsByDay = allEvents.countsByDay.takeLast(lastDays)
             averageMinutesByDay = allEvents.averageMinutes.takeLast(lastDays)
-            Log.e("counts", countsByDay.toString())
         }
     }
 
@@ -309,7 +307,7 @@ fun MainScreen(
                         verticalArrangement = Arrangement.SpaceEvenly,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        val sdf = SimpleDateFormat("dd", Locale.getDefault())
+                        val sdf = SimpleDateFormat("dd.MM", Locale.getDefault())
                         val dailyBars = countsByDay
                             .takeLast(10).map {
                                 val label = sdf.format(it.first)
@@ -365,8 +363,8 @@ fun MainScreen(
                         verticalArrangement = Arrangement.SpaceEvenly,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(text = firstSmokingTime)
-                        Text(text = perCurrentMonth)
+                        Text(text = firstSmokingTime, textAlign = TextAlign.Center)
+                        Text(text = perCurrentMonth, textAlign = TextAlign.Center)
                     }
                 }
             }
