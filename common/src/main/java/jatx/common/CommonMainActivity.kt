@@ -2,15 +2,19 @@
 
 package jatx.common
 
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.runtime.Composable
@@ -20,17 +24,27 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import androidx.wear.compose.material.Button
-import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.dialog.Alert
+import com.github.tehras.charts.bar.BarChart
+import com.github.tehras.charts.bar.BarChartData
+import com.github.tehras.charts.bar.renderer.bar.SimpleBarDrawer
+import com.github.tehras.charts.bar.renderer.label.SimpleValueDrawer
+import com.github.tehras.charts.bar.renderer.xaxis.SimpleXAxisDrawer
+import com.github.tehras.charts.bar.renderer.yaxis.SimpleYAxisDrawer
+import com.github.tehras.charts.piechart.animation.simpleChartAnimation
 import jatx.common.theme.Purple200
 import jatx.common.theme.SmokeTimeTheme
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 
 open class CommonMainActivity : ComponentActivity() {
     private var ago by mutableStateOf(formattedZeroTime)
@@ -41,6 +55,8 @@ open class CommonMainActivity : ComponentActivity() {
     private var countForCurrentMonth by mutableStateOf(0.formattedCigaretteCount)
     private var showAddConfirm by mutableStateOf(false)
     private var showDeleteConfirm by mutableStateOf(false)
+    private var countsByDay by mutableStateOf(listOf(Date() to 0))
+    private var averageMinutesByDay by mutableStateOf(listOf(Date() to 0))
 
     override fun onResume() {
         super.onResume()
@@ -59,6 +75,8 @@ open class CommonMainActivity : ComponentActivity() {
             averageTime = averageTimePerDay,
             firstSmokingTime = firstSmokingTimeForToday,
             perCurrentMonth = countForCurrentMonth,
+            countsByDay = countsByDay,
+            averageMinutesByDay = averageMinutesByDay,
             onSmokeClick = {
                 showAddConfirm = true
             },
@@ -138,6 +156,9 @@ open class CommonMainActivity : ComponentActivity() {
             averageTimePerDay = allEvents.averageTimePerDay
             firstSmokingTimeForToday = allEvents.firstSmokingTimeForToday
             countForCurrentMonth = allEvents.countForCurrentMonth
+            countsByDay = allEvents.countsByDay
+            averageMinutesByDay = allEvents.averageMinutesByDay
+            Log.e("counts", countsByDay.toString())
         }
     }
 
@@ -173,17 +194,19 @@ fun MainScreen(
     averageTime: String,
     firstSmokingTime: String,
     perCurrentMonth: String,
+    countsByDay: List<Pair<Date, Int>>,
+    averageMinutesByDay: List<Pair<Date, Int>>,
     onSmokeClick: () -> Unit,
     onSmokeLongClick: () -> Unit
 ) {
     SmokeTimeTheme {
-        VerticalPager(pageCount = 3) { page ->
+        VerticalPager(pageCount = 4) { page ->
             when (page) {
                 0 -> {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(MaterialTheme.colors.background),
+                            .background(Color(0xFF888888)),
                         verticalArrangement = Arrangement.SpaceEvenly,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -217,19 +240,111 @@ fun MainScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(MaterialTheme.colors.background),
+                            .background(Color(0xFF888888)),
                         verticalArrangement = Arrangement.SpaceEvenly,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(text = averageCount)
+                        val sdf = SimpleDateFormat("dd", Locale.getDefault())
+                        val dailyBars = averageMinutesByDay
+                            .takeLast(10).map {
+                                val label = sdf.format(it.first)
+                                BarChartData.Bar(label = label, value = it.second.toFloat(), color = Color.Blue)
+                            }
+
+                        Spacer(modifier = Modifier
+                            .weight(1.0f))
+
+                        BarChart(
+                            barChartData = BarChartData(
+                                padBy = 0f,
+                                bars = dailyBars,
+                            ),
+                            modifier = Modifier
+                                .width(150.dp)
+                                .height(70.dp),
+                            animation = simpleChartAnimation(),
+                            barDrawer = SimpleBarDrawer(),
+                            xAxisDrawer = SimpleXAxisDrawer(
+                                axisLineThickness = 2.dp,
+                                axisLineColor = Color.White
+                            ),
+                            yAxisDrawer = SimpleYAxisDrawer(
+                                axisLineThickness = 2.dp,
+                                axisLineColor = Color.White
+                            ),
+                            labelDrawer = SimpleValueDrawer(
+                                drawLocation = SimpleValueDrawer.DrawLocation.XAxis,
+                                labelTextSize = 9.sp,
+                                labelTextColor = Color.White
+                            )
+                        )
+
+                        Spacer(modifier = Modifier
+                            .weight(0.5f))
+
                         Text(text = averageTime)
+
+                        Spacer(modifier = Modifier
+                            .weight(1.0f))
                     }
                 }
                 2 -> {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(MaterialTheme.colors.background),
+                            .background(Color(0xFF888888)),
+                        verticalArrangement = Arrangement.SpaceEvenly,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        val sdf = SimpleDateFormat("dd", Locale.getDefault())
+                        val dailyBars = countsByDay
+                            .takeLast(10).map {
+                                val label = sdf.format(it.first)
+                                BarChartData.Bar(label = label, value = it.second.toFloat(), color = Color.Blue)
+                            }
+
+                        Spacer(modifier = Modifier
+                            .weight(1.0f))
+
+                        BarChart(
+                            barChartData = BarChartData(
+                                padBy = 0f,
+                                bars = dailyBars,
+                            ),
+                            modifier = Modifier
+                                .width(150.dp)
+                                .height(70.dp),
+                            animation = simpleChartAnimation(),
+                            barDrawer = SimpleBarDrawer(),
+                            xAxisDrawer = SimpleXAxisDrawer(
+                                axisLineThickness = 2.dp,
+                                axisLineColor = Color.White
+                            ),
+                            yAxisDrawer = SimpleYAxisDrawer(
+                                axisLineThickness = 2.dp,
+                                axisLineColor = Color.White
+                            ),
+                            labelDrawer = SimpleValueDrawer(
+                                drawLocation = SimpleValueDrawer.DrawLocation.XAxis,
+                                labelTextSize = 9.sp,
+                                labelTextColor = Color.White
+                            )
+                        )
+
+                        Spacer(modifier = Modifier
+                            .weight(0.5f))
+
+                        Text(text = averageCount)
+
+                        Spacer(modifier = Modifier
+                            .weight(1.0f))
+                    }
+                }
+                3 -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color(0xFF888888)),
                         verticalArrangement = Arrangement.SpaceEvenly,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
