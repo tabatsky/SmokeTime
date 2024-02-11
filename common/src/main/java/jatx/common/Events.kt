@@ -1,35 +1,35 @@
 package jatx.common
 
 import java.util.Date
+import kotlin.math.roundToInt
 
-val List<SmokeEventEntity>.averageCountPerDay: String
+val List<SmokeEventEntity>.averageCountPerDayAllTime: Int
     get() = this
-        .groupBy { Date(it.time).dayStart() }
-        .values
-        .map { it.count() }
+        .countsByDay
+        .map { it.second }
         .average()
-        .toInt()
-        .toString()
+        .roundToInt()
 
-val List<SmokeEventEntity>.averageTimePerDay: String
+fun List<SmokeEventEntity>.averageCountPerDayLastTime(lastDays: Int) = this
+    .countsByDay
+    .takeLast(lastDays)
+    .map { it.second }
+    .average()
+    .roundToInt()
+
+val List<SmokeEventEntity>.averageMinutesPerDayAllTime: Int
     get() = this
-        .indices
-        .takeIf {
-            it.count() >= 2
-        }
-        ?.drop(1)
-        ?.map { index ->
-            this[index - 1].time - this[index].time
-        }
-        ?.filter {
-            it < 6 * 60 * 60 * 1000L
-        }
-        ?.takeIf {
-            it.isNotEmpty()
-        }
-        ?.average()
-        ?.toLong()
-        ?.format() ?: formattedZeroTime
+        .averageMinutes
+        .map { it.second }
+        .average()
+        .roundToInt()
+
+fun List<SmokeEventEntity>.averageMinutesPerDayLastTime(lastDays: Int) = this
+    .averageMinutes
+    .takeLast(lastDays)
+    .map { it.second }
+    .average()
+    .roundToInt()
 
 val List<SmokeEventEntity>.firstSmokingTimeForToday: String
     get() = this
@@ -64,7 +64,7 @@ val List<SmokeEventEntity>.countsByDay: List<Pair<Date, Int>>
             dayStart to count
         }
 
-val List<SmokeEventEntity>.averageMinutesByDay: List<Pair<Date, Int>>
+val List<SmokeEventEntity>.averageMinutes: List<Pair<Date, Int>>
     get() = this
         .map { Date(it.time).dayStart() }
         .distinct()

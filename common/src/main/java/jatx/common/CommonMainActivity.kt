@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -39,11 +40,19 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+const val lastDays = 10
+
+const val labelUp = "▲"
+const val labelDown = "▼"
+const val labelSquare = "◼"
+
 open class CommonMainActivity : ComponentActivity() {
     private var ago by mutableStateOf(formattedZeroTime)
     private var totalCount by mutableStateOf("0")
-    private var averageCountPerDay by mutableStateOf("0")
-    private var averageTimePerDay by mutableStateOf(formattedZeroTime)
+    private var averageCountPerDayAllTime by mutableStateOf(0)
+    private var averageCountPerDayLastTime by mutableStateOf(0)
+    private var averageMinutesPerDayAllTime by mutableStateOf(0)
+    private var averageMinutesPerDayLastTime by mutableStateOf(0)
     private var firstSmokingTimeForToday by mutableStateOf(formattedMidnight)
     private var countForCurrentMonth by mutableStateOf(0.formattedCigaretteCount)
     private var showAddConfirm by mutableStateOf(false)
@@ -64,8 +73,10 @@ open class CommonMainActivity : ComponentActivity() {
             buttonLabel = buttonLabel,
             ago = ago,
             totalCount = totalCount,
-            averageCount = averageCountPerDay,
-            averageTime = averageTimePerDay,
+            averageCountAllTime = averageCountPerDayAllTime,
+            averageCountLastTime = averageCountPerDayLastTime,
+            averageMinutesAllTime = averageMinutesPerDayAllTime,
+            averageMinutesLastTime = averageMinutesPerDayLastTime,
             firstSmokingTime = firstSmokingTimeForToday,
             perCurrentMonth = countForCurrentMonth,
             countsByDay = countsByDay,
@@ -145,12 +156,14 @@ open class CommonMainActivity : ComponentActivity() {
                 .invoke(applicationContext)
                 .smokingDao()
                 .getAllEvents()
-            averageCountPerDay = allEvents.averageCountPerDay
-            averageTimePerDay = allEvents.averageTimePerDay
+            averageCountPerDayAllTime = allEvents.averageCountPerDayAllTime
+            averageCountPerDayLastTime = allEvents.averageCountPerDayLastTime(lastDays)
+            averageMinutesPerDayAllTime = allEvents.averageMinutesPerDayAllTime
+            averageMinutesPerDayLastTime = allEvents.averageMinutesPerDayLastTime(lastDays)
             firstSmokingTimeForToday = allEvents.firstSmokingTimeForToday
             countForCurrentMonth = allEvents.countForCurrentMonth
-            countsByDay = allEvents.countsByDay
-            averageMinutesByDay = allEvents.averageMinutesByDay
+            countsByDay = allEvents.countsByDay.takeLast(lastDays)
+            averageMinutesByDay = allEvents.averageMinutes.takeLast(lastDays)
             Log.e("counts", countsByDay.toString())
         }
     }
@@ -184,8 +197,10 @@ fun MainScreen(
     buttonLabel: String,
     ago: String,
     totalCount: String,
-    averageCount: String,
-    averageTime: String,
+    averageCountAllTime: Int,
+    averageCountLastTime: Int,
+    averageMinutesAllTime: Int,
+    averageMinutesLastTime: Int,
     firstSmokingTime: String,
     perCurrentMonth: String,
     countsByDay: List<Pair<Date, Int>>,
@@ -266,7 +281,21 @@ fun MainScreen(
                         Spacer(modifier = Modifier
                             .weight(0.5f))
 
-                        Text(text = averageTime)
+                        val (label, color) = if (averageMinutesLastTime > averageMinutesAllTime) {
+                            labelUp to Color.Green
+                        } else if (averageMinutesLastTime < averageMinutesAllTime) {
+                            labelDown to Color.Red
+                        } else {
+                            labelSquare to Color.Gray
+                        }
+
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            Text(text = "${averageMinutesLastTime}m", color = color)
+                            Text(text = label, color = color)
+                            Text(text = "${averageMinutesAllTime}m")
+                        }
 
                         Spacer(modifier = Modifier
                             .weight(1.0f))
@@ -308,7 +337,21 @@ fun MainScreen(
                         Spacer(modifier = Modifier
                             .weight(0.5f))
 
-                        Text(text = averageCount)
+                        val (label, color) = if (averageCountLastTime > averageCountAllTime) {
+                            labelUp to Color.Red
+                        } else if (averageCountLastTime < averageCountAllTime) {
+                            labelDown to Color.Green
+                        } else {
+                            labelSquare to Color.Gray
+                        }
+
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            Text(text = averageCountLastTime.toString(), color = color)
+                            Text(text = label, color = color)
+                            Text(text = averageCountAllTime.toString())
+                        }
 
                         Spacer(modifier = Modifier
                             .weight(1.0f))
