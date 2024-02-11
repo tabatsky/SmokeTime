@@ -32,13 +32,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.dialog.Alert
-import com.github.tehras.charts.bar.BarChart
-import com.github.tehras.charts.bar.BarChartData
-import com.github.tehras.charts.bar.renderer.bar.SimpleBarDrawer
-import com.github.tehras.charts.bar.renderer.label.SimpleValueDrawer
-import com.github.tehras.charts.bar.renderer.xaxis.SimpleXAxisDrawer
-import com.github.tehras.charts.bar.renderer.yaxis.SimpleYAxisDrawer
-import com.github.tehras.charts.piechart.animation.simpleChartAnimation
 import jatx.common.theme.Purple200
 import jatx.common.theme.SmokeTimeTheme
 import kotlinx.coroutines.launch
@@ -185,6 +178,7 @@ open class CommonMainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MainScreen(
     buttonLabel: String,
@@ -206,7 +200,7 @@ fun MainScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(Color(0xFF888888)),
+                            .background(Color.Black),
                         verticalArrangement = Arrangement.SpaceEvenly,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -240,43 +234,33 @@ fun MainScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(Color(0xFF888888)),
+                            .background(Color.Black),
                         verticalArrangement = Arrangement.SpaceEvenly,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        val sdf = SimpleDateFormat("dd", Locale.getDefault())
+                        val sdf = SimpleDateFormat("dd.MM", Locale.getDefault())
                         val dailyBars = averageMinutesByDay
                             .takeLast(10).map {
                                 val label = sdf.format(it.first)
-                                BarChartData.Bar(label = label, value = it.second.toFloat(), color = Color.Blue)
+                                BarChartItem(value = it.second.toFloat(), label = label, color = Color.Blue)
                             }
+                        val maxValue =
+                            (averageMinutesByDay.takeLast(10).maxOf { it.second } / 5 + 1) * 5
 
                         Spacer(modifier = Modifier
                             .weight(1.0f))
 
-                        BarChart(
-                            barChartData = BarChartData(
-                                padBy = 0f,
-                                bars = dailyBars,
-                            ),
+                        JatxBarChart(
                             modifier = Modifier
-                                .width(150.dp)
-                                .height(70.dp),
-                            animation = simpleChartAnimation(),
-                            barDrawer = SimpleBarDrawer(),
-                            xAxisDrawer = SimpleXAxisDrawer(
-                                axisLineThickness = 2.dp,
-                                axisLineColor = Color.White
-                            ),
-                            yAxisDrawer = SimpleYAxisDrawer(
-                                axisLineThickness = 2.dp,
-                                axisLineColor = Color.White
-                            ),
-                            labelDrawer = SimpleValueDrawer(
-                                drawLocation = SimpleValueDrawer.DrawLocation.XAxis,
-                                labelTextSize = 9.sp,
-                                labelTextColor = Color.White
-                            )
+                                .width(180.dp)
+                                .height(140.dp),
+                            backgroundColor = Color.Black,
+                            lineColor = Color.White,
+                            textColor = Color.White,
+                            textSize = 6.sp,
+                            maxValue = maxValue.toFloat(),
+                            valueStep = 5f,
+                            items = dailyBars
                         )
 
                         Spacer(modifier = Modifier
@@ -292,7 +276,7 @@ fun MainScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(Color(0xFF888888)),
+                            .background(Color.Black),
                         verticalArrangement = Arrangement.SpaceEvenly,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -300,35 +284,25 @@ fun MainScreen(
                         val dailyBars = countsByDay
                             .takeLast(10).map {
                                 val label = sdf.format(it.first)
-                                BarChartData.Bar(label = label, value = it.second.toFloat(), color = Color.Blue)
+                                BarChartItem(value = it.second.toFloat(), label = label, color = Color.Blue)
                             }
+                        val maxValue =
+                            (countsByDay.takeLast(10).maxOf { it.second } / 5 + 1) * 5
 
                         Spacer(modifier = Modifier
                             .weight(1.0f))
 
-                        BarChart(
-                            barChartData = BarChartData(
-                                padBy = 0f,
-                                bars = dailyBars,
-                            ),
+                        JatxBarChart(
                             modifier = Modifier
-                                .width(150.dp)
-                                .height(70.dp),
-                            animation = simpleChartAnimation(),
-                            barDrawer = SimpleBarDrawer(),
-                            xAxisDrawer = SimpleXAxisDrawer(
-                                axisLineThickness = 2.dp,
-                                axisLineColor = Color.White
-                            ),
-                            yAxisDrawer = SimpleYAxisDrawer(
-                                axisLineThickness = 2.dp,
-                                axisLineColor = Color.White
-                            ),
-                            labelDrawer = SimpleValueDrawer(
-                                drawLocation = SimpleValueDrawer.DrawLocation.XAxis,
-                                labelTextSize = 9.sp,
-                                labelTextColor = Color.White
-                            )
+                                .width(180.dp)
+                                .height(140.dp),
+                            backgroundColor = Color.Black,
+                            lineColor = Color.White,
+                            textColor = Color.White,
+                            textSize = 6.sp,
+                            maxValue = maxValue.toFloat(),
+                            valueStep = 5f,
+                            items = dailyBars
                         )
 
                         Spacer(modifier = Modifier
@@ -344,7 +318,7 @@ fun MainScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(Color(0xFF888888)),
+                            .background(Color.Black),
                         verticalArrangement = Arrangement.SpaceEvenly,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
