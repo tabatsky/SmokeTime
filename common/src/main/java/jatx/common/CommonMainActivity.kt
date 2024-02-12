@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.AndroidUiDispatcher
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,7 +35,9 @@ import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.dialog.Alert
 import jatx.common.theme.Purple200
 import jatx.common.theme.SmokeTimeTheme
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -44,18 +47,9 @@ const val labelDown = "▼"
 const val labelSquare = "◼"
 
 open class CommonMainActivity : ComponentActivity() {
-    private var agoLast by mutableStateOf(formattedZeroTime)
-    private var totalCountForToday by mutableStateOf("0")
-    private var averageCountByDayAllTime by mutableStateOf(0)
-    private var averageCountByDayLastTime by mutableStateOf(0)
-    private var averageOfAverageMinutesForDayAllTime by mutableStateOf(0)
-    private var averageOfAverageMinutesForDayLastTime by mutableStateOf(0)
-    private var firstSmokingTimeForToday by mutableStateOf(formattedMidnight)
-    private var countForCurrentMonth by mutableStateOf(0.formattedCigaretteCount)
     private var showAddConfirm by mutableStateOf(false)
     private var showDeleteConfirm by mutableStateOf(false)
-    private var countsByDayLastTime by mutableStateOf(listOf(Date() to 0))
-    private var averageMinutesForDayLastTime by mutableStateOf(listOf(Date() to 0))
+    private var appState by mutableStateOf(AppState())
 
     override fun onResume() {
         super.onResume()
@@ -68,16 +62,16 @@ open class CommonMainActivity : ComponentActivity() {
     ) {
         MainScreen(
             buttonLabel = buttonLabel,
-            agoLast = agoLast,
-            totalCountForToday = totalCountForToday,
-            averageCountByDayAllTime = averageCountByDayAllTime,
-            averageCountByDayLastTime = averageCountByDayLastTime,
-            averageOfAverageMinutesForDayAllTime = averageOfAverageMinutesForDayAllTime,
-            averageOfAverageMinutesForDayLastTime = averageOfAverageMinutesForDayLastTime,
-            firstSmokingTimeForToday = firstSmokingTimeForToday,
-            countForCurrentMonth = countForCurrentMonth,
-            countsByDayLastTime = countsByDayLastTime,
-            averageMinutesForDayLastTime = averageMinutesForDayLastTime,
+            agoLast = appState.agoLast,
+            totalCountForToday = appState.totalCountForToday,
+            averageCountByDayAllTime = appState.averageCountByDayAllTime,
+            averageCountByDayLastTime = appState.averageCountByDayLastTime,
+            averageOfAverageMinutesForDayAllTime = appState.averageOfAverageMinutesForDayAllTime,
+            averageOfAverageMinutesForDayLastTime = appState.averageOfAverageMinutesForDayLastTime,
+            firstSmokingTimeForToday = appState.firstSmokingTimeForToday,
+            countForCurrentMonth = appState.countForCurrentMonth,
+            countsByDayLastTime = appState.countsByDayLastTime,
+            averageMinutesForDayLastTime = appState.averageMinutesForDayLastTime,
             onSmokeClick = {
                 showAddConfirm = true
             },
@@ -137,30 +131,49 @@ open class CommonMainActivity : ComponentActivity() {
 
     private fun updateFromDB() {
         lifecycleScope.launch {
-            val date = Date()
-            totalCountForToday = AppDatabase
-                .invoke(applicationContext)
-                .smokingDao()
-                .getEventCountForTimeInterval(date.dayStart().time, date.dayEnd().time)
-                .toString()
-            agoLast = AppDatabase
-                .invoke(applicationContext)
-                .smokingDao()
-                .getLastEvent()
-                ?.let { Date(it.time) }
-                ?.format() ?: formattedZeroTime
-            val allEvents = AppDatabase
-                .invoke(applicationContext)
-                .smokingDao()
-                .getAllEvents()
-            averageCountByDayAllTime = allEvents.averageCountByDayAllTime
-            averageCountByDayLastTime = allEvents.averageCountByDayLastTime
-            averageOfAverageMinutesForDayAllTime = allEvents.averageOfAverageMinutesForDayAllTime
-            averageOfAverageMinutesForDayLastTime = allEvents.averageOfAverageMinutesForDayLastTime
-            firstSmokingTimeForToday = allEvents.firstSmokingTimeForToday
-            countForCurrentMonth = allEvents.countForCurrentMonth
-            countsByDayLastTime = allEvents.countsByDayLastTime
-            averageMinutesForDayLastTime = allEvents.averageMinutesForDayLastTime
+            withContext(Dispatchers.IO) {
+                val date = Date()
+                val totalCountForToday = AppDatabase
+                    .invoke(applicationContext)
+                    .smokingDao()
+                    .getEventCountForTimeInterval(date.dayStart().time, date.dayEnd().time)
+                    .toString()
+                val agoLast = AppDatabase
+                    .invoke(applicationContext)
+                    .smokingDao()
+                    .getLastEvent()
+                    ?.let { Date(it.time) }
+                    ?.format() ?: formattedZeroTime
+                val allEvents = AppDatabase
+                    .invoke(applicationContext)
+                    .smokingDao()
+                    .getAllEvents()
+                val averageCountByDayAllTime = allEvents.averageCountByDayAllTime
+                val averageCountByDayLastTime = allEvents.averageCountByDayLastTime
+                val averageOfAverageMinutesForDayAllTime =
+                    allEvents.averageOfAverageMinutesForDayAllTime
+                val averageOfAverageMinutesForDayLastTime =
+                    allEvents.averageOfAverageMinutesForDayLastTime
+                val firstSmokingTimeForToday = allEvents.firstSmokingTimeForToday
+                val countForCurrentMonth = allEvents.countForCurrentMonth
+                val countsByDayLastTime = allEvents.countsByDayLastTime
+                val averageMinutesForDayLastTime = allEvents.averageMinutesForDayLastTime
+
+                withContext(AndroidUiDispatcher.Main) {
+                    appState = AppState(
+                        agoLast = agoLast,
+                        totalCountForToday = totalCountForToday,
+                        averageCountByDayAllTime = averageCountByDayAllTime,
+                        averageCountByDayLastTime = averageCountByDayLastTime,
+                        averageOfAverageMinutesForDayAllTime = averageOfAverageMinutesForDayAllTime,
+                        averageMinutesForDayLastTime = averageMinutesForDayLastTime,
+                        firstSmokingTimeForToday = firstSmokingTimeForToday,
+                        countForCurrentMonth = countForCurrentMonth,
+                        countsByDayLastTime = countsByDayLastTime,
+                        averageOfAverageMinutesForDayLastTime = averageOfAverageMinutesForDayLastTime
+                    )
+                }
+            }
         }
     }
 
