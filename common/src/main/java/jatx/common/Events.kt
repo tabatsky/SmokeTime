@@ -3,6 +3,21 @@ package jatx.common
 import java.util.Date
 import kotlin.math.roundToInt
 
+const val lastDaysCount = 10
+
+val lastDays: List<Date>
+    get() {
+        val result = arrayListOf<Date>()
+        val todayStart = Date().dayStart()
+        val millisPerDay = 24 * 60 * 60 * 1000L
+        for (ago in 0 until 10) {
+            val date = Date()
+            date.time = todayStart.time - millisPerDay * ago
+            result.add(date)
+        }
+        return result.reversed()
+    }
+
 val List<SmokeEventEntity>.averageCountPerDayAllTime: Int
     get() = this
         .countsByDay
@@ -10,12 +25,21 @@ val List<SmokeEventEntity>.averageCountPerDayAllTime: Int
         .average()
         .roundToInt()
 
-fun List<SmokeEventEntity>.averageCountPerDayLastTime(lastDays: Int) = this
-    .countsByDay
-    .takeLast(lastDays)
-    .map { it.second }
-    .average()
-    .roundToInt()
+val List<SmokeEventEntity>.averageCountPerDayLastTime: Int
+    get() = lastDays
+        .map {  date ->
+            this.countsByDay.find { it.first == date }?.second ?: 0
+        }
+        .filter { it > 0 }
+        .average()
+        .roundToInt()
+
+val List<SmokeEventEntity>.countsByDayLastTime: List<Pair<Date, Int>>
+    get() = lastDays
+        .map {  date ->
+            val count = this.countsByDay.find { it.first == date }?.second ?: 0
+            date to count
+        }
 
 val List<SmokeEventEntity>.averageMinutesPerDayAllTime: Int
     get() = this

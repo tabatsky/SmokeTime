@@ -39,8 +39,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-const val lastDays = 10
-
 const val labelUp = "▲"
 const val labelDown = "▼"
 const val labelSquare = "◼"
@@ -156,13 +154,13 @@ open class CommonMainActivity : ComponentActivity() {
                 .smokingDao()
                 .getAllEvents()
             averageCountPerDayAllTime = allEvents.averageCountPerDayAllTime
-            averageCountPerDayLastTime = allEvents.averageCountPerDayLastTime(lastDays)
+            averageCountPerDayLastTime = allEvents.averageCountPerDayLastTime
             averageMinutesPerDayAllTime = allEvents.averageMinutesPerDayAllTime
-            averageMinutesPerDayLastTime = allEvents.averageMinutesPerDayLastTime(lastDays)
+            averageMinutesPerDayLastTime = allEvents.averageMinutesPerDayLastTime(lastDaysCount)
             firstSmokingTimeForToday = allEvents.firstSmokingTimeForToday
             countForCurrentMonth = allEvents.countForCurrentMonth
-            countsByDay = allEvents.countsByDay.takeLast(lastDays)
-            averageMinutesByDay = allEvents.averageMinutes.takeLast(lastDays)
+            countsByDay = allEvents.countsByDayLastTime
+            averageMinutesByDay = allEvents.averageMinutes.takeLast(lastDaysCount)
         }
     }
 
