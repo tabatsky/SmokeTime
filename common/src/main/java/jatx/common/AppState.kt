@@ -2,9 +2,12 @@ package jatx.common
 
 import java.util.Date
 
-data class AppState(
+data class BasicAppState(
     val agoLast: String = formattedZeroTime,
-    val totalCountForToday: String = "0",
+    val totalCountForToday: String = "0"
+)
+
+data class AdvancedAppState(
     val averageCountByDayAllTime: Int = 0,
     val averageCountByDayLastTime: Int = 0,
     val averageOfAverageMinutesForDayAllTime: Int = 0,

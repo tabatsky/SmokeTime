@@ -49,7 +49,8 @@ const val labelSquare = "◼"
 open class CommonMainActivity : ComponentActivity() {
     private var showAddConfirm by mutableStateOf(false)
     private var showDeleteConfirm by mutableStateOf(false)
-    private var appState by mutableStateOf(AppState())
+    private var basicState by mutableStateOf(BasicAppState())
+    private var advancedState by mutableStateOf(AdvancedAppState())
 
     override fun onResume() {
         super.onResume()
@@ -62,16 +63,16 @@ open class CommonMainActivity : ComponentActivity() {
     ) {
         MainScreen(
             buttonLabel = buttonLabel,
-            agoLast = appState.agoLast,
-            totalCountForToday = appState.totalCountForToday,
-            averageCountByDayAllTime = appState.averageCountByDayAllTime,
-            averageCountByDayLastTime = appState.averageCountByDayLastTime,
-            averageOfAverageMinutesForDayAllTime = appState.averageOfAverageMinutesForDayAllTime,
-            averageOfAverageMinutesForDayLastTime = appState.averageOfAverageMinutesForDayLastTime,
-            firstSmokingTimeForToday = appState.firstSmokingTimeForToday,
-            countForCurrentMonth = appState.countForCurrentMonth,
-            countsByDayLastTime = appState.countsByDayLastTime,
-            averageMinutesForDayLastTime = appState.averageMinutesForDayLastTime,
+            agoLast = basicState.agoLast,
+            totalCountForToday = basicState.totalCountForToday,
+            averageCountByDayAllTime = advancedState.averageCountByDayAllTime,
+            averageCountByDayLastTime = advancedState.averageCountByDayLastTime,
+            averageOfAverageMinutesForDayAllTime = advancedState.averageOfAverageMinutesForDayAllTime,
+            averageOfAverageMinutesForDayLastTime = advancedState.averageOfAverageMinutesForDayLastTime,
+            firstSmokingTimeForToday = advancedState.firstSmokingTimeForToday,
+            countForCurrentMonth = advancedState.countForCurrentMonth,
+            countsByDayLastTime = advancedState.countsByDayLastTime,
+            averageMinutesForDayLastTime = advancedState.averageMinutesForDayLastTime,
             onSmokeClick = {
                 showAddConfirm = true
             },
@@ -130,6 +131,11 @@ open class CommonMainActivity : ComponentActivity() {
     }
 
     private fun updateFromDB() {
+        updateBasicState()
+        updateAdvancedState()
+    }
+
+    private fun updateBasicState() {
         lifecycleScope.launch {
             withContext(Dispatchers.IO) {
                 val date = Date()
@@ -144,6 +150,20 @@ open class CommonMainActivity : ComponentActivity() {
                     .getLastEvent()
                     ?.let { Date(it.time) }
                     ?.format() ?: formattedZeroTime
+
+                withContext(AndroidUiDispatcher.Main) {
+                    basicState = BasicAppState(
+                        agoLast = agoLast,
+                        totalCountForToday = totalCountForToday
+                    )
+                }
+            }
+        }
+    }
+
+    private fun updateAdvancedState() {
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
                 val allEvents = AppDatabase
                     .invoke(applicationContext)
                     .smokingDao()
@@ -160,9 +180,7 @@ open class CommonMainActivity : ComponentActivity() {
                 val averageMinutesForDayLastTime = allEvents.averageMinutesForDayLastTime
 
                 withContext(AndroidUiDispatcher.Main) {
-                    appState = AppState(
-                        agoLast = agoLast,
-                        totalCountForToday = totalCountForToday,
+                    advancedState = AdvancedAppState(
                         averageCountByDayAllTime = averageCountByDayAllTime,
                         averageCountByDayLastTime = averageCountByDayLastTime,
                         averageOfAverageMinutesForDayAllTime = averageOfAverageMinutesForDayAllTime,
