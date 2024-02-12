@@ -44,18 +44,18 @@ const val labelDown = "▼"
 const val labelSquare = "◼"
 
 open class CommonMainActivity : ComponentActivity() {
-    private var ago by mutableStateOf(formattedZeroTime)
-    private var totalCount by mutableStateOf("0")
-    private var averageCountPerDayAllTime by mutableStateOf(0)
-    private var averageCountPerDayLastTime by mutableStateOf(0)
-    private var averageMinutesPerDayAllTime by mutableStateOf(0)
-    private var averageMinutesPerDayLastTime by mutableStateOf(0)
+    private var agoLast by mutableStateOf(formattedZeroTime)
+    private var totalCountForToday by mutableStateOf("0")
+    private var averageCountByDayAllTime by mutableStateOf(0)
+    private var averageCountByDayLastTime by mutableStateOf(0)
+    private var averageOfAverageMinutesForDayAllTime by mutableStateOf(0)
+    private var averageOfAverageMinutesForDayLastTime by mutableStateOf(0)
     private var firstSmokingTimeForToday by mutableStateOf(formattedMidnight)
     private var countForCurrentMonth by mutableStateOf(0.formattedCigaretteCount)
     private var showAddConfirm by mutableStateOf(false)
     private var showDeleteConfirm by mutableStateOf(false)
-    private var countsByDay by mutableStateOf(listOf(Date() to 0))
-    private var averageMinutesByDay by mutableStateOf(listOf(Date() to 0))
+    private var countsByDayLastTime by mutableStateOf(listOf(Date() to 0))
+    private var averageMinutesForDayLastTime by mutableStateOf(listOf(Date() to 0))
 
     override fun onResume() {
         super.onResume()
@@ -68,16 +68,16 @@ open class CommonMainActivity : ComponentActivity() {
     ) {
         MainScreen(
             buttonLabel = buttonLabel,
-            ago = ago,
-            totalCount = totalCount,
-            averageCountAllTime = averageCountPerDayAllTime,
-            averageCountLastTime = averageCountPerDayLastTime,
-            averageMinutesAllTime = averageMinutesPerDayAllTime,
-            averageMinutesLastTime = averageMinutesPerDayLastTime,
-            firstSmokingTime = firstSmokingTimeForToday,
-            perCurrentMonth = countForCurrentMonth,
-            countsByDay = countsByDay,
-            averageMinutesByDay = averageMinutesByDay,
+            agoLast = agoLast,
+            totalCountForToday = totalCountForToday,
+            averageCountByDayAllTime = averageCountByDayAllTime,
+            averageCountByDayLastTime = averageCountByDayLastTime,
+            averageOfAverageMinutesForDayAllTime = averageOfAverageMinutesForDayAllTime,
+            averageOfAverageMinutesForDayLastTime = averageOfAverageMinutesForDayLastTime,
+            firstSmokingTimeForToday = firstSmokingTimeForToday,
+            countForCurrentMonth = countForCurrentMonth,
+            countsByDayLastTime = countsByDayLastTime,
+            averageMinutesForDayLastTime = averageMinutesForDayLastTime,
             onSmokeClick = {
                 showAddConfirm = true
             },
@@ -138,12 +138,12 @@ open class CommonMainActivity : ComponentActivity() {
     private fun updateFromDB() {
         lifecycleScope.launch {
             val date = Date()
-            totalCount = AppDatabase
+            totalCountForToday = AppDatabase
                 .invoke(applicationContext)
                 .smokingDao()
                 .getEventCountForTimeInterval(date.dayStart().time, date.dayEnd().time)
                 .toString()
-            ago = AppDatabase
+            agoLast = AppDatabase
                 .invoke(applicationContext)
                 .smokingDao()
                 .getLastEvent()
@@ -153,14 +153,14 @@ open class CommonMainActivity : ComponentActivity() {
                 .invoke(applicationContext)
                 .smokingDao()
                 .getAllEvents()
-            averageCountPerDayAllTime = allEvents.averageCountPerDayAllTime
-            averageCountPerDayLastTime = allEvents.averageCountPerDayLastTime
-            averageMinutesPerDayAllTime = allEvents.averageMinutesPerDayAllTime
-            averageMinutesPerDayLastTime = allEvents.averageMinutesPerDayLastTime(lastDaysCount)
+            averageCountByDayAllTime = allEvents.averageCountByDayAllTime
+            averageCountByDayLastTime = allEvents.averageCountByDayLastTime
+            averageOfAverageMinutesForDayAllTime = allEvents.averageOfAverageMinutesForDayAllTime
+            averageOfAverageMinutesForDayLastTime = allEvents.averageOfAverageMinutesForDayLastTime
             firstSmokingTimeForToday = allEvents.firstSmokingTimeForToday
             countForCurrentMonth = allEvents.countForCurrentMonth
-            countsByDay = allEvents.countsByDayLastTime
-            averageMinutesByDay = allEvents.averageMinutes.takeLast(lastDaysCount)
+            countsByDayLastTime = allEvents.countsByDayLastTime
+            averageMinutesForDayLastTime = allEvents.averageMinutesForDayLastTime
         }
     }
 
@@ -191,16 +191,16 @@ open class CommonMainActivity : ComponentActivity() {
 @Composable
 fun MainScreen(
     buttonLabel: String,
-    ago: String,
-    totalCount: String,
-    averageCountAllTime: Int,
-    averageCountLastTime: Int,
-    averageMinutesAllTime: Int,
-    averageMinutesLastTime: Int,
-    firstSmokingTime: String,
-    perCurrentMonth: String,
-    countsByDay: List<Pair<Date, Int>>,
-    averageMinutesByDay: List<Pair<Date, Int>>,
+    agoLast: String,
+    totalCountForToday: String,
+    averageCountByDayAllTime: Int,
+    averageCountByDayLastTime: Int,
+    averageOfAverageMinutesForDayAllTime: Int,
+    averageOfAverageMinutesForDayLastTime: Int,
+    firstSmokingTimeForToday: String,
+    countForCurrentMonth: String,
+    countsByDayLastTime: List<Pair<Date, Int>>,
+    averageMinutesForDayLastTime: List<Pair<Date, Int>>,
     onSmokeClick: () -> Unit,
     onSmokeLongClick: () -> Unit
 ) {
@@ -215,7 +215,7 @@ fun MainScreen(
                         verticalArrangement = Arrangement.SpaceEvenly,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(text = totalCount)
+                        Text(text = totalCountForToday)
                         Text(
                             text = buttonLabel,
                             textAlign = TextAlign.Center,
@@ -238,7 +238,7 @@ fun MainScreen(
                                     )
                                 },
                         )
-                        Text(text = ago)
+                        Text(text = agoLast)
                     }
                 }
                 1 -> {
@@ -250,13 +250,13 @@ fun MainScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         val sdf = SimpleDateFormat("dd.MM", Locale.getDefault())
-                        val dailyBars = averageMinutesByDay
+                        val dailyBars = averageMinutesForDayLastTime
                             .takeLast(10).map {
                                 val label = sdf.format(it.first)
                                 BarChartItem(value = it.second.toFloat(), label = label, color = Color.Blue)
                             }
                         val maxValue =
-                            (averageMinutesByDay.takeLast(10).maxOf { it.second } / 5 + 1) * 5
+                            (averageMinutesForDayLastTime.takeLast(10).maxOf { it.second } / 5 + 1) * 5
 
                         Spacer(modifier = Modifier
                             .weight(1.0f))
@@ -277,9 +277,9 @@ fun MainScreen(
                         Spacer(modifier = Modifier
                             .weight(0.5f))
 
-                        val (label, color) = if (averageMinutesLastTime > averageMinutesAllTime) {
+                        val (label, color) = if (averageOfAverageMinutesForDayLastTime > averageOfAverageMinutesForDayAllTime) {
                             labelUp to Color.Green
-                        } else if (averageMinutesLastTime < averageMinutesAllTime) {
+                        } else if (averageOfAverageMinutesForDayLastTime < averageOfAverageMinutesForDayAllTime) {
                             labelDown to Color.Red
                         } else {
                             labelSquare to Color.Gray
@@ -288,9 +288,9 @@ fun MainScreen(
                         Row(
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
-                            Text(text = "${averageMinutesLastTime}m", color = color)
+                            Text(text = "${averageOfAverageMinutesForDayLastTime}m", color = color)
                             Text(text = label, color = color)
-                            Text(text = "${averageMinutesAllTime}m")
+                            Text(text = "${averageOfAverageMinutesForDayAllTime}m")
                         }
 
                         Spacer(modifier = Modifier
@@ -306,13 +306,13 @@ fun MainScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         val sdf = SimpleDateFormat("dd.MM", Locale.getDefault())
-                        val dailyBars = countsByDay
+                        val dailyBars = countsByDayLastTime
                             .takeLast(10).map {
                                 val label = sdf.format(it.first)
                                 BarChartItem(value = it.second.toFloat(), label = label, color = Color.Blue)
                             }
                         val maxValue =
-                            (countsByDay.takeLast(10).maxOf { it.second } / 5 + 1) * 5
+                            (countsByDayLastTime.takeLast(10).maxOf { it.second } / 5 + 1) * 5
 
                         Spacer(modifier = Modifier
                             .weight(1.0f))
@@ -333,9 +333,9 @@ fun MainScreen(
                         Spacer(modifier = Modifier
                             .weight(0.5f))
 
-                        val (label, color) = if (averageCountLastTime > averageCountAllTime) {
+                        val (label, color) = if (averageCountByDayLastTime > averageCountByDayAllTime) {
                             labelUp to Color.Red
-                        } else if (averageCountLastTime < averageCountAllTime) {
+                        } else if (averageCountByDayLastTime < averageCountByDayAllTime) {
                             labelDown to Color.Green
                         } else {
                             labelSquare to Color.Gray
@@ -344,9 +344,9 @@ fun MainScreen(
                         Row(
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
-                            Text(text = averageCountLastTime.toString(), color = color)
+                            Text(text = averageCountByDayLastTime.toString(), color = color)
                             Text(text = label, color = color)
-                            Text(text = averageCountAllTime.toString())
+                            Text(text = averageCountByDayAllTime.toString())
                         }
 
                         Spacer(modifier = Modifier
@@ -361,8 +361,8 @@ fun MainScreen(
                         verticalArrangement = Arrangement.SpaceEvenly,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(text = firstSmokingTime, textAlign = TextAlign.Center)
-                        Text(text = perCurrentMonth, textAlign = TextAlign.Center)
+                        Text(text = firstSmokingTimeForToday, textAlign = TextAlign.Center)
+                        Text(text = countForCurrentMonth, textAlign = TextAlign.Center)
                     }
                 }
             }
