@@ -22,6 +22,7 @@ val List<SmokeEventEntity>.averageCountByDayAllTime: Int
     get() = this
         .countsByDay
         .map { it.second }
+        .filter { it > 0 }
         .average()
         .roundToInt()
 
@@ -32,6 +33,7 @@ val List<SmokeEventEntity>.averageCountByDayLastTime: Int
             .map { date ->
                 this.countsByDay.find { it.first == date }?.second ?: 0
             }
+            .dropLast(1)
             .filter { it > 0 }
             .average()
             .roundToInt()
@@ -60,6 +62,7 @@ val List<SmokeEventEntity>.averageOfAverageMinutesForDayAllTime: Int
     get() = this
         .averageMinutesForDay
         .map { it.second }
+        .filter { it > 0 }
         .average()
         .roundToInt()
 
@@ -70,6 +73,7 @@ val List<SmokeEventEntity>.averageOfAverageMinutesForDayLastTime: Int
             .map { date ->
                 this.averageMinutesForDay.find { it.first == date }?.second ?: 0
             }
+            .filter { it > 0 }
             .average()
             .roundToInt()
     }

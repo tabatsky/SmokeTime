@@ -246,7 +246,7 @@ fun MainScreen(
                         verticalArrangement = Arrangement.SpaceEvenly,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(text = totalCountForToday)
+                        Text(text = "Last:\n$agoLast", textAlign = TextAlign.Center)
                         Text(
                             text = buttonLabel,
                             textAlign = TextAlign.Center,
@@ -269,7 +269,7 @@ fun MainScreen(
                                     )
                                 },
                         )
-                        Text(text = agoLast)
+                        Text(text = "Today:\n$totalCountForToday", textAlign = TextAlign.Center)
                     }
                 }
                 1 -> {
