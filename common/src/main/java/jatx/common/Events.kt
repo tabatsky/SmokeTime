@@ -50,11 +50,11 @@ val List<SmokeEventEntity>.countsByDayLastTime: List<Pair<Date, Int>>
     }
 private val List<SmokeEventEntity>.countsByDay: List<Pair<Date, Int>>
     get() = this
-        .map { Date(it.time).dayStart() }
-        .distinct()
-        .sorted()
-        .map {  dayStart ->
-            val count = this.count { Date(it.time).dayStart() == dayStart }
+        .groupBy { Date(it.time).dayStart() }
+        .toList()
+        .map {
+            val dayStart = it.first
+            val count = it.second.count()
             dayStart to count
         }
 
@@ -90,12 +90,11 @@ val List<SmokeEventEntity>.averageMinutesForDayLastTime: List<Pair<Date, Int>>
 
 private val List<SmokeEventEntity>.averageMinutesForDay: List<Pair<Date, Int>>
     get() = this
-        .map { Date(it.time).dayStart() }
-        .distinct()
-        .sorted()
-        .map {  dayStart ->
-            val allByDay = this
-                .filter { Date(it.time).dayStart() == dayStart }
+        .groupBy { Date(it.time).dayStart() }
+        .toList()
+        .map {
+            val dayStart = it.first
+            val allByDay = it.second
             val averageMinutes = allByDay
                 .indices
                 .takeIf {

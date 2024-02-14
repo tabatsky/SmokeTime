@@ -2,6 +2,7 @@
 
 package jatx.common
 
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -163,6 +164,7 @@ open class CommonMainActivity : ComponentActivity() {
 
     private fun updateAdvancedState() {
         lifecycleScope.launch {
+            val t0 = System.currentTimeMillis()
             withContext(Dispatchers.IO) {
                 val allEvents = AppDatabase
                     .invoke(applicationContext)
@@ -190,6 +192,8 @@ open class CommonMainActivity : ComponentActivity() {
                         countsByDayLastTime = countsByDayLastTime,
                         averageOfAverageMinutesForDayLastTime = averageOfAverageMinutesForDayLastTime
                     )
+                    val t1 = System.currentTimeMillis()
+                    Log.e("dt", (t1 - t0).toString())
                 }
             }
         }
