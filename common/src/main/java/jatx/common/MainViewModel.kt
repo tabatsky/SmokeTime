@@ -50,6 +50,7 @@ class MainViewModel(
 
     private fun updateBasicState() {
         viewModelScope.launch {
+            val t0 = System.currentTimeMillis()
             withContext(Dispatchers.IO) {
                 val date = Date()
                 val totalCountForToday = AppDatabase
@@ -69,6 +70,8 @@ class MainViewModel(
                         agoLast = agoLast,
                         totalCountForToday = totalCountForToday
                     )
+                    val t1 = System.currentTimeMillis()
+                    Log.e("dt basic", (t1 - t0).toString())
                 }
             }
         }
@@ -105,7 +108,7 @@ class MainViewModel(
                         averageOfAverageMinutesForDayLastTime = averageOfAverageMinutesForDayLastTime
                     )
                     val t1 = System.currentTimeMillis()
-                    Log.e("dt", (t1 - t0).toString())
+                    Log.e("dt advanced", (t1 - t0).toString())
                 }
             }
         }
