@@ -21,7 +21,7 @@ private val lastDays: List<Date>
 val List<SmokeEventEntity>.averageCountByDayAllTime: Int
     get() = this
         .countsByDay
-        .map { it.second }
+        .values
         .filter { it > 0 }
         .average()
         .roundToInt()
@@ -29,9 +29,10 @@ val List<SmokeEventEntity>.averageCountByDayAllTime: Int
 val List<SmokeEventEntity>.averageCountByDayLastTime: Int
     get() {
         val theLastDays = lastDays
+        val theCountsByDay = this.countsByDay
         return theLastDays
             .map { date ->
-                this.countsByDay.find { it.first == date }?.second ?: 0
+                theCountsByDay[date] ?: 0
             }
             .dropLast(1)
             .filter { it > 0 }
@@ -42,17 +43,18 @@ val List<SmokeEventEntity>.averageCountByDayLastTime: Int
 val List<SmokeEventEntity>.countsByDayLastTime: List<Pair<Date, Int>>
     get() {
         val theLastDays = lastDays
+        val theCountsByDay = this.countsByDay
         return theLastDays
             .map { date ->
-                val count = this.countsByDay.find { it.first == date }?.second ?: 0
+                val count = theCountsByDay[date] ?: 0
                 date to count
             }
     }
-private val List<SmokeEventEntity>.countsByDay: List<Pair<Date, Int>>
+private val List<SmokeEventEntity>.countsByDay: Map<Date, Int>
     get() = this
         .groupBy { Date(it.time).dayStart() }
         .toList()
-        .map {
+        .associate {
             val dayStart = it.first
             val count = it.second.count()
             dayStart to count
@@ -61,7 +63,7 @@ private val List<SmokeEventEntity>.countsByDay: List<Pair<Date, Int>>
 val List<SmokeEventEntity>.averageOfAverageMinutesForDayAllTime: Int
     get() = this
         .averageMinutesForDay
-        .map { it.second }
+        .values
         .filter { it > 0 }
         .average()
         .roundToInt()
@@ -69,9 +71,10 @@ val List<SmokeEventEntity>.averageOfAverageMinutesForDayAllTime: Int
 val List<SmokeEventEntity>.averageOfAverageMinutesForDayLastTime: Int
     get() {
         val theLastDays = lastDays
+        val theAverageMinutesForDay = this.averageMinutesForDay
         return theLastDays
             .map { date ->
-                this.averageMinutesForDay.find { it.first == date }?.second ?: 0
+                theAverageMinutesForDay[date] ?: 0
             }
             .filter { it > 0 }
             .average()
@@ -81,18 +84,19 @@ val List<SmokeEventEntity>.averageOfAverageMinutesForDayLastTime: Int
 val List<SmokeEventEntity>.averageMinutesForDayLastTime: List<Pair<Date, Int>>
     get() {
         val theLastDays = lastDays
+        val theAverageMinutesForDay = this.averageMinutesForDay
         return theLastDays
             .map {  date ->
-                val average = this.averageMinutesForDay.find { it.first == date }?.second ?: 0
+                val average = theAverageMinutesForDay[date] ?: 0
                 date to average
             }
     }
 
-private val List<SmokeEventEntity>.averageMinutesForDay: List<Pair<Date, Int>>
+private val List<SmokeEventEntity>.averageMinutesForDay: Map<Date, Int>
     get() = this
         .groupBy { Date(it.time).dayStart() }
         .toList()
-        .map {
+        .associate {
             val dayStart = it.first
             val allByDay = it.second
             val averageMinutes = allByDay
