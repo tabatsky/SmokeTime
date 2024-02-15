@@ -34,8 +34,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.dialog.Alert
-import jatx.common.theme.Purple200
-import jatx.common.theme.SmokeTimeTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -46,6 +44,8 @@ import java.util.Locale
 const val labelUp = "▲"
 const val labelDown = "▼"
 const val labelSquare = "◼"
+
+val Purple200 = Color(0xFFBB86FC)
 
 open class CommonMainActivity : ComponentActivity() {
     private var showAddConfirm by mutableStateOf(false)
@@ -239,166 +239,187 @@ fun MainScreen(
     onSmokeClick: () -> Unit,
     onSmokeLongClick: () -> Unit
 ) {
-    SmokeTimeTheme {
-        VerticalPager(pageCount = 4) { page ->
-            when (page) {
-                0 -> {
-                    Column(
+    VerticalPager(pageCount = 4) { page ->
+        when (page) {
+            0 -> {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black),
+                    verticalArrangement = Arrangement.SpaceEvenly,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(text = "Last:\n$agoLast", textAlign = TextAlign.Center)
+                    Text(
+                        text = buttonLabel,
+                        textAlign = TextAlign.Center,
                         modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black),
-                        verticalArrangement = Arrangement.SpaceEvenly,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(text = "Last:\n$agoLast", textAlign = TextAlign.Center)
-                        Text(
-                            text = buttonLabel,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .size(width = 64.dp, height = 64.dp)
-                                .combinedClickable(
-                                    onClick = {
-                                        onSmokeClick()
-                                    },
-                                    onLongClick = {
-                                        onSmokeLongClick()
-                                    }
-                                )
-                                .padding(16.dp)
-                                .wrapContentHeight()
-                                .drawBehind {
-                                    drawCircle(
-                                        color = Purple200,
-                                        radius = this.size.maxDimension
-                                    )
+                            .size(width = 64.dp, height = 64.dp)
+                            .combinedClickable(
+                                onClick = {
+                                    onSmokeClick()
                                 },
-                        )
-                        Text(text = "Today:\n$totalCountForToday", textAlign = TextAlign.Center)
-                    }
+                                onLongClick = {
+                                    onSmokeLongClick()
+                                }
+                            )
+                            .padding(16.dp)
+                            .wrapContentHeight()
+                            .drawBehind {
+                                drawCircle(
+                                    color = Purple200,
+                                    radius = this.size.maxDimension
+                                )
+                            },
+                    )
+                    Text(text = "Today:\n$totalCountForToday", textAlign = TextAlign.Center)
                 }
-                1 -> {
-                    Column(
+            }
+
+            1 -> {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black),
+                    verticalArrangement = Arrangement.SpaceEvenly,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    val sdf = SimpleDateFormat("dd.MM", Locale.getDefault())
+                    val dailyBars = averageMinutesForDayLastTime
+                        .takeLast(10).map {
+                            val label = sdf.format(it.first)
+                            BarChartItem(
+                                value = it.second.toFloat(),
+                                label = label,
+                                color = Color.Blue
+                            )
+                        }
+                    val maxValue =
+                        (averageMinutesForDayLastTime.takeLast(10).maxOf { it.second } / 5 + 1) * 5
+
+                    Spacer(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black),
-                        verticalArrangement = Arrangement.SpaceEvenly,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        val sdf = SimpleDateFormat("dd.MM", Locale.getDefault())
-                        val dailyBars = averageMinutesForDayLastTime
-                            .takeLast(10).map {
-                                val label = sdf.format(it.first)
-                                BarChartItem(value = it.second.toFloat(), label = label, color = Color.Blue)
-                            }
-                        val maxValue =
-                            (averageMinutesForDayLastTime.takeLast(10).maxOf { it.second } / 5 + 1) * 5
+                            .weight(1.0f)
+                    )
 
-                        Spacer(modifier = Modifier
-                            .weight(1.0f))
+                    JatxBarChart(
+                        modifier = Modifier
+                            .width(180.dp)
+                            .height(140.dp),
+                        backgroundColor = Color.Black,
+                        lineColor = Color.White,
+                        textColor = Color.White,
+                        textSize = 6.sp,
+                        maxValue = maxValue.toFloat(),
+                        valueStep = 5f,
+                        items = dailyBars
+                    )
 
-                        JatxBarChart(
-                            modifier = Modifier
-                                .width(180.dp)
-                                .height(140.dp),
-                            backgroundColor = Color.Black,
-                            lineColor = Color.White,
-                            textColor = Color.White,
-                            textSize = 6.sp,
-                            maxValue = maxValue.toFloat(),
-                            valueStep = 5f,
-                            items = dailyBars
-                        )
+                    Spacer(
+                        modifier = Modifier
+                            .weight(0.5f)
+                    )
 
-                        Spacer(modifier = Modifier
-                            .weight(0.5f))
-
-                        val (label, color) = if (averageOfAverageMinutesForDayLastTime > averageOfAverageMinutesForDayAllTime) {
-                            labelUp to Color.Green
-                        } else if (averageOfAverageMinutesForDayLastTime < averageOfAverageMinutesForDayAllTime) {
-                            labelDown to Color.Red
-                        } else {
-                            labelSquare to Color.Gray
-                        }
-
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            Text(text = "${averageOfAverageMinutesForDayLastTime}m", color = color)
-                            Text(text = label, color = color)
-                            Text(text = "${averageOfAverageMinutesForDayAllTime}m")
-                        }
-
-                        Spacer(modifier = Modifier
-                            .weight(1.0f))
+                    val (label, color) = if (averageOfAverageMinutesForDayLastTime > averageOfAverageMinutesForDayAllTime) {
+                        labelUp to Color.Green
+                    } else if (averageOfAverageMinutesForDayLastTime < averageOfAverageMinutesForDayAllTime) {
+                        labelDown to Color.Red
+                    } else {
+                        labelSquare to Color.Gray
                     }
+
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        Text(text = "${averageOfAverageMinutesForDayLastTime}m", color = color)
+                        Text(text = label, color = color)
+                        Text(text = "${averageOfAverageMinutesForDayAllTime}m")
+                    }
+
+                    Spacer(
+                        modifier = Modifier
+                            .weight(1.0f)
+                    )
                 }
-                2 -> {
-                    Column(
+            }
+
+            2 -> {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black),
+                    verticalArrangement = Arrangement.SpaceEvenly,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    val sdf = SimpleDateFormat("dd.MM", Locale.getDefault())
+                    val dailyBars = countsByDayLastTime
+                        .takeLast(10).map {
+                            val label = sdf.format(it.first)
+                            BarChartItem(
+                                value = it.second.toFloat(),
+                                label = label,
+                                color = Color.Blue
+                            )
+                        }
+                    val maxValue =
+                        (countsByDayLastTime.takeLast(10).maxOf { it.second } / 5 + 1) * 5
+
+                    Spacer(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black),
-                        verticalArrangement = Arrangement.SpaceEvenly,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        val sdf = SimpleDateFormat("dd.MM", Locale.getDefault())
-                        val dailyBars = countsByDayLastTime
-                            .takeLast(10).map {
-                                val label = sdf.format(it.first)
-                                BarChartItem(value = it.second.toFloat(), label = label, color = Color.Blue)
-                            }
-                        val maxValue =
-                            (countsByDayLastTime.takeLast(10).maxOf { it.second } / 5 + 1) * 5
+                            .weight(1.0f)
+                    )
 
-                        Spacer(modifier = Modifier
-                            .weight(1.0f))
+                    JatxBarChart(
+                        modifier = Modifier
+                            .width(180.dp)
+                            .height(140.dp),
+                        backgroundColor = Color.Black,
+                        lineColor = Color.White,
+                        textColor = Color.White,
+                        textSize = 6.sp,
+                        maxValue = maxValue.toFloat(),
+                        valueStep = 5f,
+                        items = dailyBars
+                    )
 
-                        JatxBarChart(
-                            modifier = Modifier
-                                .width(180.dp)
-                                .height(140.dp),
-                            backgroundColor = Color.Black,
-                            lineColor = Color.White,
-                            textColor = Color.White,
-                            textSize = 6.sp,
-                            maxValue = maxValue.toFloat(),
-                            valueStep = 5f,
-                            items = dailyBars
-                        )
+                    Spacer(
+                        modifier = Modifier
+                            .weight(0.5f)
+                    )
 
-                        Spacer(modifier = Modifier
-                            .weight(0.5f))
-
-                        val (label, color) = if (averageCountByDayLastTime > averageCountByDayAllTime) {
-                            labelUp to Color.Red
-                        } else if (averageCountByDayLastTime < averageCountByDayAllTime) {
-                            labelDown to Color.Green
-                        } else {
-                            labelSquare to Color.Gray
-                        }
-
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            Text(text = averageCountByDayLastTime.toString(), color = color)
-                            Text(text = label, color = color)
-                            Text(text = averageCountByDayAllTime.toString())
-                        }
-
-                        Spacer(modifier = Modifier
-                            .weight(1.0f))
+                    val (label, color) = if (averageCountByDayLastTime > averageCountByDayAllTime) {
+                        labelUp to Color.Red
+                    } else if (averageCountByDayLastTime < averageCountByDayAllTime) {
+                        labelDown to Color.Green
+                    } else {
+                        labelSquare to Color.Gray
                     }
+
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        Text(text = averageCountByDayLastTime.toString(), color = color)
+                        Text(text = label, color = color)
+                        Text(text = averageCountByDayAllTime.toString())
+                    }
+
+                    Spacer(
+                        modifier = Modifier
+                            .weight(1.0f)
+                    )
                 }
-                3 -> {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black),
-                        verticalArrangement = Arrangement.SpaceEvenly,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(text = firstSmokingTimeForToday, textAlign = TextAlign.Center)
-                        Text(text = countForCurrentMonth, textAlign = TextAlign.Center)
-                    }
+            }
+
+            3 -> {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black),
+                    verticalArrangement = Arrangement.SpaceEvenly,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(text = firstSmokingTimeForToday, textAlign = TextAlign.Center)
+                    Text(text = countForCurrentMonth, textAlign = TextAlign.Center)
                 }
             }
         }
