@@ -1,9 +1,11 @@
 package jatx.common
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -170,136 +172,156 @@ private fun MainScreen(
             }
 
             1 -> {
-                Column(
+                BoxWithConstraints(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.Black),
-                    verticalArrangement = Arrangement.SpaceEvenly,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .background(Color.Black)
                 ) {
-                    val sdf = SimpleDateFormat("dd.MM", Locale.getDefault())
-                    val dailyBars = averageMinutesForDayLastTime
-                        .takeLast(10).map {
-                            val label = sdf.format(it.first)
-                            BarChartItem(
-                                value = it.second.toFloat(),
-                                label = label,
-                                color = Color.Blue
-                            )
-                        }
-                    val maxValue =
-                        (averageMinutesForDayLastTime.takeLast(10).maxOf { it.second } / 5 + 1) * 5
+                    val W = this.maxWidth
+                    val H = this.maxHeight
+                    Log.e("W x H", "$W x $H")
 
-                    Spacer(
+                    Column(
                         modifier = Modifier
-                            .weight(1.0f)
-                    )
-
-                    JatxBarChart(
-                        modifier = Modifier
-                            .width(180.dp)
-                            .height(140.dp),
-                        backgroundColor = Color.Black,
-                        lineColor = Color.White,
-                        textColor = Color.White,
-                        textSize = 6.sp,
-                        maxValue = maxValue.toFloat(),
-                        valueStep = 5f,
-                        items = dailyBars
-                    )
-
-                    Spacer(
-                        modifier = Modifier
-                            .weight(0.5f)
-                    )
-
-                    val (label, color) = if (averageOfAverageMinutesForDayLastTime > averageOfAverageMinutesForDayAllTime) {
-                        labelUp to Color.Green
-                    } else if (averageOfAverageMinutesForDayLastTime < averageOfAverageMinutesForDayAllTime) {
-                        labelDown to Color.Red
-                    } else {
-                        labelSquare to Color.Gray
-                    }
-
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceEvenly
+                            .fillMaxSize()
+                            .background(Color.Black),
+                        verticalArrangement = Arrangement.SpaceEvenly,
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(text = "${averageOfAverageMinutesForDayLastTime}m", color = color)
-                        Text(text = label, color = color)
-                        Text(text = "${averageOfAverageMinutesForDayAllTime}m")
-                    }
+                        val sdf = SimpleDateFormat("dd.MM", Locale.getDefault())
+                        val dailyBars = averageMinutesForDayLastTime
+                            .takeLast(10).map {
+                                val label = sdf.format(it.first)
+                                BarChartItem(
+                                    value = it.second.toFloat(),
+                                    label = label,
+                                    color = Color.Blue
+                                )
+                            }
+                        val maxValue =
+                            (averageMinutesForDayLastTime.takeLast(10).maxOf { it.second } / 5 + 1) * 5
 
-                    Spacer(
-                        modifier = Modifier
-                            .weight(1.0f)
-                    )
+                        Spacer(
+                            modifier = Modifier
+                                .weight(1.0f)
+                        )
+
+                        JatxBarChart(
+                            modifier = Modifier
+                                .width(W * 180f / 233f)
+                                .height(H * 140f / 233f),
+                            backgroundColor = Color.Black,
+                            lineColor = Color.White,
+                            textColor = Color.White,
+                            textSize = 6.sp,
+                            maxValue = maxValue.toFloat(),
+                            valueStep = 5f,
+                            items = dailyBars
+                        )
+
+                        Spacer(
+                            modifier = Modifier
+                                .weight(0.5f)
+                        )
+
+                        val (label, color) = if (averageOfAverageMinutesForDayLastTime > averageOfAverageMinutesForDayAllTime) {
+                            labelUp to Color.Green
+                        } else if (averageOfAverageMinutesForDayLastTime < averageOfAverageMinutesForDayAllTime) {
+                            labelDown to Color.Red
+                        } else {
+                            labelSquare to Color.Gray
+                        }
+
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            Text(text = "${averageOfAverageMinutesForDayLastTime}m", color = color)
+                            Text(text = label, color = color)
+                            Text(text = "${averageOfAverageMinutesForDayAllTime}m")
+                        }
+
+                        Spacer(
+                            modifier = Modifier
+                                .weight(1.0f)
+                        )
+                    }
                 }
             }
 
             2 -> {
-                Column(
+                BoxWithConstraints(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.Black),
-                    verticalArrangement = Arrangement.SpaceEvenly,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .background(Color.Black)
                 ) {
-                    val sdf = SimpleDateFormat("dd.MM", Locale.getDefault())
-                    val dailyBars = countsByDayLastTime
-                        .takeLast(10).map {
-                            val label = sdf.format(it.first)
-                            BarChartItem(
-                                value = it.second.toFloat(),
-                                label = label,
-                                color = Color.Blue
-                            )
-                        }
-                    val maxValue =
-                        (countsByDayLastTime.takeLast(10).maxOf { it.second } / 5 + 1) * 5
+                    val W = this.maxWidth
+                    val H = this.maxHeight
+                    Log.e("W x H", "$W x $H")
 
-                    Spacer(
+                    Column(
                         modifier = Modifier
-                            .weight(1.0f)
-                    )
-
-                    JatxBarChart(
-                        modifier = Modifier
-                            .width(180.dp)
-                            .height(140.dp),
-                        backgroundColor = Color.Black,
-                        lineColor = Color.White,
-                        textColor = Color.White,
-                        textSize = 6.sp,
-                        maxValue = maxValue.toFloat(),
-                        valueStep = 5f,
-                        items = dailyBars
-                    )
-
-                    Spacer(
-                        modifier = Modifier
-                            .weight(0.5f)
-                    )
-
-                    val (label, color) = if (averageCountByDayLastTime > averageCountByDayAllTime) {
-                        labelUp to Color.Red
-                    } else if (averageCountByDayLastTime < averageCountByDayAllTime) {
-                        labelDown to Color.Green
-                    } else {
-                        labelSquare to Color.Gray
-                    }
-
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceEvenly
+                            .fillMaxSize()
+                            .background(Color.Black),
+                        verticalArrangement = Arrangement.SpaceEvenly,
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(text = averageCountByDayLastTime.toString(), color = color)
-                        Text(text = label, color = color)
-                        Text(text = averageCountByDayAllTime.toString())
-                    }
+                        val sdf = SimpleDateFormat("dd.MM", Locale.getDefault())
+                        val dailyBars = countsByDayLastTime
+                            .takeLast(10).map {
+                                val label = sdf.format(it.first)
+                                BarChartItem(
+                                    value = it.second.toFloat(),
+                                    label = label,
+                                    color = Color.Blue
+                                )
+                            }
+                        val maxValue =
+                            (countsByDayLastTime.takeLast(10).maxOf { it.second } / 5 + 1) * 5
 
-                    Spacer(
-                        modifier = Modifier
-                            .weight(1.0f)
-                    )
+                        Spacer(
+                            modifier = Modifier
+                                .weight(1.0f)
+                        )
+
+                        JatxBarChart(
+                            modifier = Modifier
+                                .width(W * 180f / 233f)
+                                .height(H * 140f / 233f),
+                            backgroundColor = Color.Black,
+                            lineColor = Color.White,
+                            textColor = Color.White,
+                            textSize = 6.sp,
+                            maxValue = maxValue.toFloat(),
+                            valueStep = 5f,
+                            items = dailyBars
+                        )
+
+                        Spacer(
+                            modifier = Modifier
+                                .weight(0.5f)
+                        )
+
+                        val (label, color) = if (averageCountByDayLastTime > averageCountByDayAllTime) {
+                            labelUp to Color.Red
+                        } else if (averageCountByDayLastTime < averageCountByDayAllTime) {
+                            labelDown to Color.Green
+                        } else {
+                            labelSquare to Color.Gray
+                        }
+
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            Text(text = averageCountByDayLastTime.toString(), color = color)
+                            Text(text = label, color = color)
+                            Text(text = averageCountByDayAllTime.toString())
+                        }
+
+                        Spacer(
+                            modifier = Modifier
+                                .weight(1.0f)
+                        )
+                    }
                 }
             }
 
