@@ -13,7 +13,7 @@ data class AdvancedAppState(
     val averageOfAverageMinutesForDayAllTime: Int = 0,
     val averageOfAverageMinutesForDayLastTime: Int = 0,
     val firstSmokingTimeForToday: String = formattedMidnight,
-    val countForCurrentMonth: String = 0.formattedCigaretteCount,
+    val countForCurrentMonth: String = "",
     val countsByDayLastTime: List<Pair<Date, Int>> = listOf(Date() to 0),
     val averageMinutesForDayLastTime: List<Pair<Date, Int>> = listOf(Date() to 0)
 )

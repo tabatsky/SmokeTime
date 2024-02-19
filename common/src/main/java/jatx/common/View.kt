@@ -41,13 +41,14 @@ val Purple200 = Color(0xFFBB86FC)
 
 @Composable
 fun Content(
-    buttonLabel: String
+    appearance: Appearance
 ) {
     val viewModel: MainViewModel = viewModel()
+    viewModel.appearance = appearance
 
     with(viewModel) {
         MainScreen(
-            buttonLabel = buttonLabel,
+            appearance = appearance,
             agoLast = basicState.agoLast,
             totalCountForToday = basicState.totalCountForToday,
             averageCountByDayAllTime = advancedState.averageCountByDayAllTime,
@@ -68,7 +69,7 @@ fun Content(
         if (showAddConfirm) {
             Alert(
                 title = {
-                    Text(text = areYouSureAdd)
+                    Text(text = appearance.areYouSureAdd)
                 },
                 positiveButton = {
                     Button(
@@ -76,7 +77,7 @@ fun Content(
                             showAddConfirm = false
                             newEvent()
                         }) {
-                        Text(yes)
+                        Text(appearance.yes)
                     }
                 },
                 negativeButton = {
@@ -84,7 +85,7 @@ fun Content(
                         onClick = {
                             showAddConfirm = false
                         }) {
-                        Text(no)
+                        Text(appearance.no)
                     }
                 }
             )
@@ -92,7 +93,7 @@ fun Content(
         if (showDeleteConfirm) {
             Alert(
                 title = {
-                    Text(text = areYouSureDelete)
+                    Text(text = appearance.areYouSureDelete)
                 },
                 positiveButton = {
                     Button(
@@ -100,7 +101,7 @@ fun Content(
                             showDeleteConfirm = false
                             deleteLastEvent()
                         }) {
-                        Text(yes)
+                        Text(appearance.yes)
                     }
                 },
                 negativeButton = {
@@ -108,7 +109,7 @@ fun Content(
                         onClick = {
                             showDeleteConfirm = false
                         }) {
-                        Text(no)
+                        Text(appearance.no)
                     }
                 }
             )
@@ -119,7 +120,7 @@ fun Content(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun MainScreen(
-    buttonLabel: String,
+    appearance: Appearance,
     agoLast: String,
     totalCountForToday: String,
     averageCountByDayAllTime: Int,
@@ -144,9 +145,9 @@ private fun MainScreen(
                     verticalArrangement = Arrangement.SpaceEvenly,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(text = "Last:\n$agoLast", textAlign = TextAlign.Center)
+                    Text(text = "${appearance.lastLabel}\n$agoLast", textAlign = TextAlign.Center)
                     Text(
-                        text = buttonLabel,
+                        text = appearance.buttonLabel,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .size(width = 64.dp, height = 64.dp)
@@ -167,7 +168,7 @@ private fun MainScreen(
                                 )
                             },
                     )
-                    Text(text = "Today:\n$totalCountForToday", textAlign = TextAlign.Center)
+                    Text(text = "${appearance.todayLabel}\n$totalCountForToday", textAlign = TextAlign.Center)
                 }
             }
 

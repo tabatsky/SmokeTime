@@ -25,6 +25,8 @@ class MainViewModel(
     var basicState by mutableStateOf(BasicAppState())
     var advancedState by mutableStateOf(AdvancedAppState())
 
+    var appearance: Appearance? by mutableStateOf(null)
+
     companion object {
 
         val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
@@ -91,8 +93,11 @@ class MainViewModel(
                     allEvents.averageOfAverageMinutesForDayAllTime
                 val averageOfAverageMinutesForDayLastTime =
                     allEvents.averageOfAverageMinutesForDayLastTime
-                val firstSmokingTimeForToday = allEvents.firstSmokingTimeForToday
-                val countForCurrentMonth = allEvents.countForCurrentMonth
+                val firstSmokingTimeForToday = allEvents.firstSmokingTimeForToday(
+                    appearance?.firstTodayLabel ?: "")
+                val countForCurrentMonth = allEvents.countForCurrentMonth(
+                    appearance?.currentMonthLabel ?: "",
+                    appearance?.packsLabel ?: "")
                 val countsByDayLastTime = allEvents.countsByDayLastTime
                 val averageMinutesForDayLastTime = allEvents.averageMinutesForDayLastTime
 

@@ -120,27 +120,24 @@ private val List<SmokeEventEntity>.averageMinutesForDay: Map<Date, Int>
             dayStart to averageMinutes
         }
 
-val List<SmokeEventEntity>.firstSmokingTimeForToday: String
-    get() {
+fun List<SmokeEventEntity>.firstSmokingTimeForToday(firstToday: String): String {
         val time = this
             .filter { Date(it.time).dayStart() == Date().dayStart() }
             .takeIf { it.isNotEmpty() }
             ?.minBy { it.time }
             ?.let { Date(it.time) }
             ?.formattedTime() ?: formattedMidnight
-        return "First today:\n$time"
+        return "$firstToday\n$time"
     }
 
-val List<SmokeEventEntity>.countForCurrentMonth: String
-    get() = this
+fun List<SmokeEventEntity>.countForCurrentMonth(currentMonthLabel: String, packsLabel: String) = this
         .count { Date(it.time).monthStart() == Date().monthStart() }
-        .formattedCigaretteCount
+        .formattedCigaretteCount(currentMonthLabel, packsLabel)
 
-val Int.formattedCigaretteCount: String
-    get() = this
+fun Int.formattedCigaretteCount(currentMonthLabel: String, packsLabel: String) = this
         .let {
             val packs = it / 20
             val units = it % 20
-            "Current month:\n$packs packs + $units"
+            "$currentMonthLabel\n$packs $packsLabel + $units"
         }
 

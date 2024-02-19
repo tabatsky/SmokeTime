@@ -10,7 +10,7 @@ class MainActivity : CommonMainActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            Content(buttonLabel = smokeButtonLabel)
+            Content(appearance = AppearanceImpl())
         }
     }
 }
