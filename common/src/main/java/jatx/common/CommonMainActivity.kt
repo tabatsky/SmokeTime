@@ -8,12 +8,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
 
-open class CommonMainActivity : ComponentActivity() {
+abstract class CommonMainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModels { MainViewModel.Factory }
 
+    abstract val appearance: Appearance
+
     override fun onResume() {
         super.onResume()
+        viewModel.appearance = appearance
         viewModel.updateFromDB()
     }
 

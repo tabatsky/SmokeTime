@@ -44,7 +44,6 @@ fun Content(
     appearance: Appearance
 ) {
     val viewModel: MainViewModel = viewModel()
-    viewModel.appearance = appearance
 
     with(viewModel) {
         MainScreen(
