@@ -50,7 +50,7 @@ class MainViewModel(
         updateAdvancedState()
     }
 
-    private fun updateBasicState() {
+    fun updateBasicState() {
         viewModelScope.launch {
             val t0 = System.currentTimeMillis()
             withContext(Dispatchers.IO) {
