@@ -15,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Date
+import kotlin.properties.Delegates
 
 class MainViewModel(
     private val applicationContext: Context
@@ -25,7 +26,7 @@ class MainViewModel(
     var basicState by mutableStateOf(BasicAppState())
     var advancedState by mutableStateOf(AdvancedAppState())
 
-    var appearance: Appearance? by mutableStateOf(null)
+    var appearance by Delegates.notNull<Appearance>()
 
     companion object {
 
@@ -94,10 +95,10 @@ class MainViewModel(
                 val averageOfAverageMinutesForDayLastTime =
                     allEvents.averageOfAverageMinutesForDayLastTime
                 val firstSmokingTimeForToday = allEvents.firstSmokingTimeForToday(
-                    appearance?.firstTodayLabel ?: "")
+                    appearance.firstTodayLabel)
                 val countForCurrentMonth = allEvents.countForCurrentMonth(
-                    appearance?.currentMonthLabel ?: "",
-                    appearance?.packsLabel ?: "")
+                    appearance.currentMonthLabel,
+                    appearance.packsLabel)
                 val countsByDayLastTime = allEvents.countsByDayLastTime
                 val averageMinutesForDayLastTime = allEvents.averageMinutesForDayLastTime
 
