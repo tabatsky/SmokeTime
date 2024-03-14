@@ -66,7 +66,8 @@ class MainViewModel(
                     .smokingDao()
                     .getLastEvent()
                     ?.let { Date(it.time) }
-                    ?.format() ?: formattedZeroTime
+                    ?.format(appearance.hourLetter, appearance.minuteLetter)
+                    ?: formattedZeroTime(appearance.hourLetter, appearance.minuteLetter)
 
                 withContext(AndroidUiDispatcher.Main) {
                     basicState = BasicAppState(

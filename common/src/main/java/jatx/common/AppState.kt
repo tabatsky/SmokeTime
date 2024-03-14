@@ -3,7 +3,7 @@ package jatx.common
 import java.util.Date
 
 data class BasicAppState(
-    val agoLast: String = formattedZeroTime,
+    val agoLast: String = "",
     val totalCountForToday: String = "0"
 )
 

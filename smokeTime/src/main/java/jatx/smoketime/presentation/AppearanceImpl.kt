@@ -14,4 +14,6 @@ class AppearanceImpl: Appearance {
     override val firstTodayLabel = "First today:"
     override val currentMonthLabel = "Current month:"
     override val packsLabel = "packs"
+    override val hourLetter = "h"
+    override val minuteLetter = "m"
 }

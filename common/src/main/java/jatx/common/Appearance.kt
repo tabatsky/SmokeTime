@@ -11,4 +11,6 @@ interface Appearance {
     val firstTodayLabel: String
     val currentMonthLabel: String
     val packsLabel: String
+    val hourLetter: String
+    val minuteLetter: String
 }
