@@ -23,8 +23,9 @@ val List<SmokeEventEntity>.averageCountByDayAllTime: Int
         .countsByDay
         .values
         .filter { it > 0 }
-        .average()
-        .roundToInt()
+        .takeIf { it.isNotEmpty() }
+        ?.average()
+        ?.roundToInt() ?: 0
 
 val List<SmokeEventEntity>.averageCountByDayLastTime: Int
     get() {
@@ -36,8 +37,9 @@ val List<SmokeEventEntity>.averageCountByDayLastTime: Int
             }
             .dropLast(1)
             .filter { it > 0 }
-            .average()
-            .roundToInt()
+            .takeIf { it.isNotEmpty() }
+            ?.average()
+            ?.roundToInt() ?: 0
     }
 
 val List<SmokeEventEntity>.countsByDayLastTime: List<Pair<Date, Int>>
@@ -65,8 +67,9 @@ val List<SmokeEventEntity>.averageOfAverageMinutesForDayAllTime: Int
         .averageMinutesForDay
         .values
         .filter { it > 0 }
-        .average()
-        .roundToInt()
+        .takeIf { it.isNotEmpty() }
+        ?.average()
+        ?.roundToInt() ?: 0
 
 val List<SmokeEventEntity>.averageOfAverageMinutesForDayLastTime: Int
     get() {
@@ -77,8 +80,9 @@ val List<SmokeEventEntity>.averageOfAverageMinutesForDayLastTime: Int
                 theAverageMinutesForDay[date] ?: 0
             }
             .filter { it > 0 }
-            .average()
-            .roundToInt()
+            .takeIf { it.isNotEmpty() }
+            ?.average()
+            ?.roundToInt() ?: 0
     }
 
 val List<SmokeEventEntity>.averageMinutesForDayLastTime: List<Pair<Date, Int>>
