@@ -7,12 +7,14 @@ import jatx.common.Content
 
 class MainActivity : CommonMainActivity() {
 
-    override val appearance = AppearanceImpl()
+    override val appearance by lazy {
+        AppearanceImpl(applicationContext)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            Content(appearance = AppearanceImpl())
+            Content(appearance = appearance)
         }
     }
 }

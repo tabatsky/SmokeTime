@@ -1,8 +1,16 @@
 <resources>
     <string name="app_name">SmokeTime</string>
-    <!--
-    This string is used for square devices and overridden by hello_world in
-    values-round/strings.xml for round devices.
-    -->
-    <string name="hello_world">From the Square world,\nHello, %1$s!</string>
+
+    <string name="button_label">🚬</string>
+    <string name="last_label">Last:</string>
+    <string name="are_you_sure_add">Smoke now?</string>
+    <string name="are_you_sure_delete">Delete last?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="today_label">Today:</string>
+    <string name="first_today_label">First today:</string>
+    <string name="current_month_label">Current month:</string>
+    <string name="packs_label">packs</string>
+    <string name="hour_letter">h</string>
+    <string name="minute_letter">m</string>
 </resources>
