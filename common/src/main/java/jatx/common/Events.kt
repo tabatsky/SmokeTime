@@ -1,5 +1,6 @@
 package jatx.common
 
+import android.util.Log
 import java.util.Date
 import kotlin.math.roundToInt
 
@@ -37,7 +38,7 @@ val List<SmokeEventEntity>.averageCountByDayLastTime: Int
             }
             .dropLast(1)
             .filter { it > 0 }
-            .takeIf { it.isNotEmpty() }
+            .takeIf { it.size > 1 }
             ?.average()
             ?.roundToInt() ?: 0
     }
