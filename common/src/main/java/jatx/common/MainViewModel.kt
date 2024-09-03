@@ -1,7 +1,11 @@
 package jatx.common
 
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.util.Log
+import androidx.activity.ComponentActivity.ALARM_SERVICE
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -14,6 +18,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Calendar
 import java.util.Date
 import kotlin.properties.Delegates
 
@@ -127,6 +132,7 @@ class MainViewModel(
                 .invoke(applicationContext)
                 .smokingDao()
                 .addEvent(SmokeEventEntity(time = System.currentTimeMillis()))
+            resetAlarm(35)
             updateFromDB()
         }
     }
@@ -142,5 +148,28 @@ class MainViewModel(
             updateFromDB()
         }
     }
+
+    fun resetAlarm(minutes: Int) {
+        cancelAlarm(applicationContext)
+        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        if (hour < 18) {
+            setAlarm(applicationContext, minutes)
+        }
+    }
+}
+
+private fun cancelAlarm(context: Context) {
+    val intent = Intent(context, AlarmReceiver::class.java)
+    val sender = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+    val alarmManager = context.getSystemService(ALARM_SERVICE) as AlarmManager
+    alarmManager.cancel(sender)
+}
+
+private fun setAlarm(context: Context, minutes: Int) {
+    val am = context.getSystemService(ALARM_SERVICE) as AlarmManager
+    val intent = Intent(context, AlarmReceiver::class.java)
+    val pi = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+    val dt = minutes * 60 * 1000L
+    am[AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + dt] = pi
 }
 
