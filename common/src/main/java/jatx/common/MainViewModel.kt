@@ -127,12 +127,12 @@ class MainViewModel(
     }
 
     fun newEvent() {
+        //resetAlarm(10)
         viewModelScope.launch {
             AppDatabase
                 .invoke(applicationContext)
                 .smokingDao()
                 .addEvent(SmokeEventEntity(time = System.currentTimeMillis()))
-            resetAlarm(35)
             updateFromDB()
         }
     }
@@ -170,6 +170,6 @@ private fun setAlarm(context: Context, minutes: Int) {
     val intent = Intent(context, AlarmReceiver::class.java)
     val pi = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
     val dt = minutes * 60 * 1000L
-    am[AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + dt] = pi
+    am.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + dt, pi)
 }
 
